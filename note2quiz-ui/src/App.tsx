@@ -8,31 +8,30 @@ import UploadPage from "./pages/UploadPage";
 import QuizPage from "./pages/QuizPage";
 import NotFound from "./pages/NotFound";
 import { RedirectToSignIn, SignedIn, SignedOut } from "@clerk/clerk-react";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <>
-   <SignedOut>
-      <RedirectToSignIn />
-    </SignedOut>
 
-    <SignedIn>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/upload" element={<UploadPage />} />
-              <Route path="/quiz/:id" element={<QuizPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
+              <Route path="/quiz" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </SignedIn>
+
     </>
 );
 
