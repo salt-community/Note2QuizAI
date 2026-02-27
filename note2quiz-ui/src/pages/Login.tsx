@@ -8,8 +8,15 @@ const Login = () => {
         afterSignInUrl="/"
         appearance={{
           elements: {
+            headerTitle: "text-white",
+      headerSubtitle: "text-muted-foreground",
             rootBox: "mx-auto",
             card: "bg-card border border-border shadow-xl",
+            socialButtonsBlockButton: "text-white",
+      socialButtonsBlockButtonText: "text-white",
+dividerText: "text-gray-400",
+      formFieldLabel: "text-white",
+      formFieldInput: "text-white",
           },
         }}
       />
