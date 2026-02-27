@@ -25,7 +25,7 @@ public record QuestionDto(
 
 public record SubmitQuizRequest(
     int QuizSessionId,
-    List<int> SelectedAnswers
+    List<int> SelectedOptionsId
 );
 
 public record SubmitQuizResponse(
@@ -37,8 +37,8 @@ public record SubmitQuizResponse(
 
 public record QuestionResultDto(
     int QuestionId,
-    int SelectedOptionIndex,
-    int CorrectOptionIndex,
+    int SelectedOptionId,
+    int CorrectOptionId,
     bool IsCorrect
 );
 
