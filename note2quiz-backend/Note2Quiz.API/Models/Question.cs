@@ -7,4 +7,5 @@ public class Question
     public DateTime CreatedAt { get; set; }
     public List<Option> Options { get; set; }
     public int QuizSessionId { get; set; }
+    public QuizSession? QuizSession { get; set; }
 }
