@@ -1,6 +1,7 @@
 import { Zap, FileText, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { UserButton, useUser } from "@clerk/clerk-react";
 
 const Header = () => {
   const location = useLocation();
@@ -43,9 +44,15 @@ const Header = () => {
           </Link>
         </nav>
 
-        <button className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:text-foreground">
-          <User className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9",
+              },
+            }}
+          />
+        </div>  
       </div>
     </header>
   );

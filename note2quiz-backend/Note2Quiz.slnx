@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Note2Quiz.API/Note2Quiz.API.csproj" />
+  <Project Path="Note2Quiz.Tests/Note2Quiz.Tests.csproj" />
+</Solution>
