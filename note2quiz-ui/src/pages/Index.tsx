@@ -22,21 +22,22 @@ const Index = () => {
       <Header />
       <main className="container py-8">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-end justify-between"
-        >
-          <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Welcome back! Here's your quiz overview.</p>
-          </div>
-          <Button variant="glow" size="lg" asChild>
-            <Link to="/upload">
-              <Plus className="h-4 w-4" />
-              Create New Quiz
-            </Link>
-          </Button>
-        </motion.div>
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+>
+  <div>
+    <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard</h1>
+    <p className="mt-1 text-muted-foreground">Welcome back! Here's your quiz overview.</p>
+  </div>
+
+  <Button variant="glow" size="lg" asChild className="w-full sm:w-auto">
+    <Link to="/upload" className="justify-center">
+      <Plus className="h-4 w-4" />
+      Create New Quiz
+    </Link>
+  </Button>
+</motion.div>
 
         {hasQuizzes && (
           <>
