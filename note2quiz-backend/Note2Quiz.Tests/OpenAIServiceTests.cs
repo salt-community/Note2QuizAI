@@ -1,6 +1,7 @@
 using Moq;
 using Note2Quiz.API.DTOs;
 using Note2Quiz.API.Services;
+using Note2Quiz.API.Services.OpenAI;
 using Xunit;
 
 namespace Note2Quiz.Tests.Services;
