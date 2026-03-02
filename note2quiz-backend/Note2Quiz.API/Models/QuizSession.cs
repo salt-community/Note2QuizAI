@@ -1,6 +1,6 @@
 namespace Note2Quiz.API.Models;
 
-public class QuizSessions
+public class QuizSession
 {
     public int Id { get; set; }
     public string UserId { get; set; }
