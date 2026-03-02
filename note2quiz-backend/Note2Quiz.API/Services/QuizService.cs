@@ -20,7 +20,7 @@ public class QuizService
         _vision = vision;
     }
 
-    public async Task<QuizResponse> CreateQuizAsync(IFormFile file, Difficulty difficulty, CancellationToken ct)
+    public async Task<QuizResponse> CreateQuizAsync(string userId, IFormFile file, Difficulty difficulty, CancellationToken ct)
     {
         await using var stream = file.OpenReadStream();
         var text = await _vision.ExtractTextFromImageAsync(stream);
@@ -28,7 +28,7 @@ public class QuizService
 
         var session = new QuizSession
         {
-            UserId = "TODO",
+            UserId = userId,
             CreatedAt = DateTime.UtcNow,
             Questions = new List<Question>()
         };
@@ -73,6 +73,5 @@ public class QuizService
 
         return dto;
     }
-
 
 }
