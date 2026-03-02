@@ -32,7 +32,7 @@ public class OpenAIService : IOpenAIService
 
         var json = await _chatClient.GetCompletionAsync(systemPrompt, userPrompt, ct);
 
-        var model = DeserializeStrict(json);
+        var model = OpenAIResponseParser.DeserializeStrict(json);
 
         Validate(model);
 
@@ -50,29 +50,6 @@ public class OpenAIService : IOpenAIService
         }
 
         return result;
-    }
-
-    private static QuizGenResponse DeserializeStrict(string json)
-    {
-        try
-        {
-            var model = JsonSerializer.Deserialize<QuizGenResponse>(
-                json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }
-            );
-
-            if (model == null)
-                throw new InvalidOperationException("Invalid AI response: null.");
-
-            return model;
-        }
-        catch (JsonException ex)
-        {
-            throw new InvalidOperationException("Invalid AI response: not valid JSON.", ex);
-        }
     }
 
     private static void Validate(QuizGenResponse model)
@@ -116,8 +93,5 @@ public class OpenAIService : IOpenAIService
 
         return text.Substring(0, maxChars);
     }
-
-
-
 
 }
