@@ -24,7 +24,8 @@ public static class SeedData
                     {
                         new Option { Text = "Stockholm", IsCorrect = true },
                         new Option { Text = "Gothenburg", IsCorrect = false },
-                        new Option { Text = "Malmö", IsCorrect = false }
+                        new Option { Text = "Malmö", IsCorrect = false },
+                        new Option { Text = "Västerås", IsCorrect = false }
                     }
                 },
                 new Question
@@ -35,7 +36,8 @@ public static class SeedData
                     {
                         new Option { Text = "Mars", IsCorrect = true },
                         new Option { Text = "Venus", IsCorrect = false },
-                        new Option { Text = "Jupiter", IsCorrect = false }
+                        new Option { Text = "Jupiter", IsCorrect = false },
+                        new Option { Text = "Tellus", IsCorrect = false }
                     }
                 }
             }
