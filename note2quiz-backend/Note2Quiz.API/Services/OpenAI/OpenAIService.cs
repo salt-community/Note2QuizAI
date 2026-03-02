@@ -75,8 +75,6 @@ public class OpenAIService : IOpenAIService
         }
     }
 
-
-
     private static void Validate(QuizGenResponse model)
     {
         if (model.Questions == null)
@@ -119,15 +117,7 @@ public class OpenAIService : IOpenAIService
         return text.Substring(0, maxChars);
     }
 
-    private sealed class QuizGenResponse
-    {
-        public List<QuizGenQuestion> Questions { get; set; } = new();
-    }
 
-    private sealed class QuizGenQuestion
-    {
-        public string Question { get; set; } = "";
-        public List<string> Options { get; set; } = new();
-        public int CorrectOptionIndex { get; set; }
-    }
+
+
 }
