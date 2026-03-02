@@ -20,7 +20,7 @@ public class QuizServiceTests
         var file = CreateTestFormFile();
 
         vision
-            .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>()))
+            .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("source text");
 
         var ai = new List<GeneratedQuestion>
@@ -65,7 +65,7 @@ public class QuizServiceTests
         var dto = await sut.CreateQuizAsync("user-1", file, Difficulty.Easy, CancellationToken.None);
 
         // assert - calls
-        vision.Verify(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>()), Times.Once);
+        vision.Verify(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
         openAi.Verify(o => o.GenerateQuizAsync("source text", Difficulty.Easy, It.IsAny<CancellationToken>()), Times.Once);
         repo.Verify(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>()), Times.Once);
 
