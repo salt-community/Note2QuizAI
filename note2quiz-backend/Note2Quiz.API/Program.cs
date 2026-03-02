@@ -1,5 +1,6 @@
 using Azure;
 using Azure.AI.Vision.ImageAnalysis;
+using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Services;
 
@@ -19,6 +20,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
+    await SeedData.InitializeAsync(db);
 }
 
 app.UseHttpsRedirection();

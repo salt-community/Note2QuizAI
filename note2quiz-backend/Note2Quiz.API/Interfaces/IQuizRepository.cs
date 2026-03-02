@@ -4,9 +4,9 @@ namespace Note2Quiz.API.Interfaces;
 
 public interface IQuizRepository
 {
-    Task<QuizSessions> GetQuizSessionAsync(int id);
-    Task<List<QuizSessions>> GetAllQuizSessionsAsync(string userId);
-    Task<QuizSessions> CreateQuizSessionAsync(QuizSessions quizSession);
+    Task<QuizSession> GetQuizSessionAsync(int id);
+    Task<List<QuizSession>> GetAllQuizSessionsAsync(string userId);
+    Task<QuizSession> CreateQuizSessionAsync(QuizSession quizSession);
 
     Task<Question> GetQuestionAsync(int id);
     Task<List<Question>> GetQuestionsByQuizSessionIdAsync(int quizSessionId);
