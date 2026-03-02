@@ -30,7 +30,12 @@ public record OptionDto(
 
 public record SubmitQuizRequest(
     int QuizSessionId,
-    List<int> SelectedOptionsIds
+    List<AnswerDto> Answers
+);
+
+public record AnswerDto(
+    int QuestionId,
+    int SelectedOptionId
 );
 
 public record SubmitQuizResponse(
