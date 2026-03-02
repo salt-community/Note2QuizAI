@@ -20,7 +20,12 @@ public record QuizResponse(
 public record QuestionDto(
     int Id,
     string Text,
-    List<string> Options
+    List<OptionDto> Options
+);
+
+public record OptionDto(
+    int OptionId,
+    string OptionText
 );
 
 public record SubmitQuizRequest(
