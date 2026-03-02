@@ -12,12 +12,13 @@ public class VisionService : IVisionService
         _client = client;
     }
 
-    public async Task<string> ExtractTextFromImageAsync(Stream imageStream)
+    public async Task<string> ExtractTextFromImageAsync(Stream imageStream, CancellationToken ct)
     {
         var result = await _client.AnalyzeAsync(
             BinaryData.FromStream(imageStream),
             VisualFeatures.Read,
-            new ImageAnalysisOptions { Language = "en" }
+            new ImageAnalysisOptions { Language = "en" },
+            ct
         );
         return string.Join(
             "\n",
