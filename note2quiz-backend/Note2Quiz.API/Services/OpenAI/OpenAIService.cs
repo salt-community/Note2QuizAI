@@ -9,6 +9,8 @@ public class OpenAIService : IOpenAIService
 {
     private readonly IChatClient _chatClient;
 
+    private const int MaxSourceChars = 8000;
+
     public OpenAIService(IChatClient chatClient)
     {
         _chatClient = chatClient;
@@ -23,7 +25,7 @@ public class OpenAIService : IOpenAIService
         if (string.IsNullOrWhiteSpace(sourceText))
             throw new ArgumentException("sourceText is required.");
 
-        var trimmed = Truncate(sourceText, 8000);
+        var trimmed = TextTruncator.Truncate(sourceText, MaxSourceChars);
 
         var systemPrompt =
             "You generate quizzes. Return ONLY valid JSON. No markdown. No extra text.";
@@ -50,15 +52,6 @@ public class OpenAIService : IOpenAIService
         }
 
         return result;
-    }
-
-
-
-    private static string Truncate(string text, int maxChars)
-    {
-        if (text.Length <= maxChars) return text;
-
-        return text.Substring(0, maxChars);
     }
 
 }
