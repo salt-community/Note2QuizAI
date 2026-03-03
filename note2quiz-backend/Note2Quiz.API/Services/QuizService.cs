@@ -6,7 +6,7 @@ using Note2Quiz.API.Models;
 
 namespace Note2Quiz.API.Services;
 
-public class QuizService
+public class QuizService : IQuizService
 {
 
     private readonly IQuizRepository _repo;
