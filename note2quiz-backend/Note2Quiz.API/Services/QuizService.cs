@@ -53,7 +53,8 @@ public class QuizService : IQuizService
             session.Questions.Add(question);
         }
 
-        var saved = await _repo.CreateQuizSessionAsync(session);
+        // var saved = await _repo.CreateQuizSessionAsync(session, ct);
+        var saved = session;
 
         var dto = new QuizResponse(
             QuizSessionId: saved.Id,
