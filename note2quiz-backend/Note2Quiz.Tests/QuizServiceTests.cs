@@ -17,7 +17,8 @@ public class QuizServiceTests
         var openAi = new Mock<IOpenAIService>();
         var repo = new Mock<IQuizRepository>();
 
-        var file = CreateTestFormFile();
+        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("fake image"));
+        var request = new CreateQuizRequest(stream, Difficulty.Easy);
 
         vision
             .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
@@ -62,7 +63,7 @@ public class QuizServiceTests
         var sut = new QuizService(repo.Object, openAi.Object, vision.Object);
 
         // act
-        var dto = await sut.CreateQuizAsync("user-1", file, Difficulty.Easy, CancellationToken.None);
+        var dto = await sut.CreateQuizAsync("user-1", request, CancellationToken.None);
 
         // assert - calls
         vision.Verify(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
