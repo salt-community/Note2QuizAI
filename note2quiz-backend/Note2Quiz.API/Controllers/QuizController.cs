@@ -1,4 +1,51 @@
-// POST /api/quiz/generate
 // GET /api/quiz/history
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Note2Quiz.API.DTOs;
+using Note2Quiz.API.Interfaces;
+
 namespace Note2Quiz.API.Controllers;
 
+[ApiController]
+[Route("api[controller]")]
+[Authorize]
+public class QuizController : ControllerBase
+{
+    private readonly IQuizService _quizService;
+
+    public QuizController(IQuizService quizService)
+    {
+        _quizService = quizService;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<QuizResponse>> Create(
+        [FromForm] IFormFile file,
+        [FromForm] Difficulty difficulty,
+        CancellationToken ct)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("File is required.");
+
+        if (file.ContentType is not ("image/jpeg" or "image/png"))
+            return BadRequest("Only jpeg or png allowed.");
+
+        var userId = User.FindFirst("sub")?.Value;
+        if (userId == null)
+            return Unauthorized();
+
+        await using var stream = file.OpenReadStream();
+
+        var request = new CreateQuizRequest(stream, difficulty);
+
+        var result = await _quizService.CreateQuizAsync(userId, request, ct);
+
+        return Ok(result);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult> get()
+    {
+        return Ok("worked");
+    }
+}
