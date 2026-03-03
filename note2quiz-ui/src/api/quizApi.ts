@@ -7,7 +7,8 @@ export enum Difficulty {
 }
 export const uploadImageAndGenerateQuiz = async(
     file:File,
-     difficulty: Difficulty
+    difficulty: Difficulty,
+    token:string
 ) =>
 {
     const formData = new FormData();
@@ -17,6 +18,9 @@ export const uploadImageAndGenerateQuiz = async(
        API_ENDPOINTS.quiz.generate
         ,{
             method:"POST",
+            headers: {
+                    Authorization: `Bearer ${token}`, 
+                    },
             body:formData,
         }
     );

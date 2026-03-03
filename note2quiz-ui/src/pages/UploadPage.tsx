@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { uploadImageAndGenerateQuiz } from "@/api/quizApi";
 import { Difficulty } from "@/api/quizApi";
+import { useAuth } from "@clerk/clerk-react";
 
 
 const difficulties = Object.values(Difficulty);
@@ -18,6 +19,7 @@ const UploadPage = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Medium);
   const navigate = useNavigate();
+  const {getToken} = useAuth();
 
   const handleFile = useCallback((f: File) => {
     setFile(f);
@@ -36,7 +38,8 @@ const UploadPage = () => {
     const mutation = useMutation({
           mutationFn: async () => {
             if (!file) throw new Error("No file uploaded");
-            return uploadImageAndGenerateQuiz(file, difficulty);
+            const token = await getToken(); 
+            return uploadImageAndGenerateQuiz(file, difficulty,token);
           },
           onSuccess: (data) => {
             navigate(`/quiz/${data.id}`);
