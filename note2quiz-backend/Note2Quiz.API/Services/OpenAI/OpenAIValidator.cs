@@ -9,7 +9,6 @@ public static class OpenAIValidator
 
         foreach (var q in model.Questions.ToList())
         {
-            // Validera grundkrav
             if (string.IsNullOrWhiteSpace(q.Question) ||
                 q.Options == null ||
                 q.Options.Count < 2) //Accept at least 2 options to save the call
