@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { uploadImageAndGenerateQuiz } from "@/api/quizApi";
 import { Difficulty } from "@/api/quizApi";
 
+
 const difficulties = Object.values(Difficulty);
 
 const UploadPage = () => {

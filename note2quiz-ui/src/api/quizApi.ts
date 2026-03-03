@@ -1,3 +1,5 @@
+import { API_ENDPOINTS } from "@/config/apiConfig";
+
 export enum Difficulty {
   Easy = "Easy",
   Medium = "Medium",
@@ -12,7 +14,7 @@ export const uploadImageAndGenerateQuiz = async(
     formData.append("image",file);
     formData.append("difficulty",difficulty);
     const response = await fetch(
-        "/api/quiz/generate"
+       API_ENDPOINTS.quiz.generate
         ,{
             method:"POST",
             body:formData,
