@@ -12,8 +12,9 @@ builder.Services.AddSingleton<ImageAnalysisClient>(sp =>
     var key = builder.Configuration["AzureVision:Key"];
     return new ImageAnalysisClient(new Uri(endPoint), new AzureKeyCredential(key));
 });
-builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<IVisionService, VisionService>();
+builder.Services.AddScoped<IOpenAIService, OpenAIService>();
+builder.Services.AddScoped<IQuizService, QuizService>();
 
 builder.Services.AddOpenApi();
 
