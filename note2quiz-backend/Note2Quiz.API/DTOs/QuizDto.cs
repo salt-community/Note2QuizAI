@@ -8,7 +8,7 @@ public enum Difficulty
 }
 
 public record CreateQuizRequest(
-    string ImageBase64,
+    Stream ImageStream,
     Difficulty Difficulty
 );
 
