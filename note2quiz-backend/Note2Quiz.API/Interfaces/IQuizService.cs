@@ -7,5 +7,4 @@ public interface IQuizService
 {
     Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct);
 
-    Task<List<QuizSession>> GetUserQuizzesAsync(string userId);
 }
