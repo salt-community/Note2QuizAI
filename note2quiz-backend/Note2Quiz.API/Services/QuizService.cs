@@ -20,11 +20,10 @@ public class QuizService
         _vision = vision;
     }
 
-    public async Task<QuizResponse> CreateQuizAsync(string userId, IFormFile file, Difficulty difficulty, CancellationToken ct)
+    public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
     {
-        await using var stream = file.OpenReadStream();
-        var text = await _vision.ExtractTextFromImageAsync(stream, ct);
-        var aiQuestions = await _openAi.GenerateQuizAsync(text, difficulty, ct);
+        var text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+        var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
 
         var session = new QuizSession
         {
