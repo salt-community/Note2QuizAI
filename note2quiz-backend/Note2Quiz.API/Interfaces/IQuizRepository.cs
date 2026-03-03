@@ -6,7 +6,7 @@ public interface IQuizRepository
 {
     Task<QuizSession> GetQuizSessionAsync(int id);
     Task<List<QuizSession>> GetAllQuizSessionsAsync(string userId);
-    Task<QuizSession> CreateQuizSessionAsync(QuizSession quizSession);
+    Task<QuizSession> CreateQuizSessionAsync(QuizSession session);
 
     Task<Question> GetQuestionAsync(int id);
     Task<List<Question>> GetQuestionsByQuizSessionIdAsync(int quizSessionId);
