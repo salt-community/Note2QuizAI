@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { uploadImageAndGenerateQuiz } from "@/api/quizApi";
+import { Difficulty } from "@/api/quizApi";
 
-const difficulties = ["Easy", "Medium", "Hard"] as const;
+
+const difficulties = Object.values(Difficulty);
 
 const UploadPage = () => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [difficulty, setDifficulty] = useState<typeof difficulties[number]>("Medium");
-  const [loading, setLoading] = useState(false);
+  const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Medium);
   const navigate = useNavigate();
 
   const handleFile = useCallback((f: File) => {
@@ -30,12 +33,19 @@ const UploadPage = () => {
     if (f && (f.type === "image/jpeg" || f.type === "image/png")) handleFile(f);
   }, [handleFile]);
 
-  const handleGenerate = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/quiz/demo");
-    }, 2500);
-  };
+    const mutation = useMutation({
+          mutationFn: async () => {
+            if (!file) throw new Error("No file uploaded");
+            return uploadImageAndGenerateQuiz(file, difficulty);
+          },
+          onSuccess: (data) => {
+            navigate(`/quiz/${data.id}`);
+          },
+          onError: (error) => {
+            console.error(error);
+          },
+        });
+  
 
   return (
     <div className="min-h-screen">
@@ -67,7 +77,7 @@ const UploadPage = () => {
         </motion.div>
 
         <AnimatePresence mode="wait">
-          {loading ? (
+          {mutation.isPending ? (
             <motion.div
               key="loading"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -151,11 +161,20 @@ const UploadPage = () => {
                 variant="glow"
                 size="lg"
                 className="mt-8 w-full text-base"
-                disabled={!file}
-                onClick={handleGenerate}
+                disabled={!file || mutation.isPending}
+                onClick={() => mutation.mutate()}
               >
-                <Zap className="h-4 w-4" />
-                Generate Quiz
+                  {mutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4" />
+                      Generate Quiz
+                    </>
+                  )}
               </Button>
             </motion.div>
           )}
