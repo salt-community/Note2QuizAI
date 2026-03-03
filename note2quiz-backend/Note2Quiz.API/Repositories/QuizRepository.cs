@@ -1,9 +1,10 @@
 using Note2Quiz.API.Data;
+using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Models;
 
 namespace Note2Quiz.API.Repositories;
 
-public class QuizRepository
+public class QuizRepository : IQuizRepository
 {
     private readonly Note2QuizDbContext _db;
 
