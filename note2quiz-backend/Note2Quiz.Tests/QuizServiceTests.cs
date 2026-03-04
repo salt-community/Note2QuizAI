@@ -2,6 +2,7 @@ using Moq;
 using Note2Quiz.API.DTOs;
 using Note2Quiz.API.Models;
 using Note2Quiz.API.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace Note2Quiz.API.Services;
 
@@ -16,8 +17,13 @@ public class QuizServiceTests
         var repo = new Mock<IQuizRepository>();
 
         var validText = "This is a long enough source text that should pass the 50 characters validation gatekeeper.";
-        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("fake image stream"));
-        var request = new CreateQuizRequest(stream, Difficulty.Easy);
+
+        var file = new Mock<IFormFile>();
+        file.SetupGet(f => f.Length).Returns(1);
+        file.SetupGet(f => f.ContentType).Returns("image/png");
+        file.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(new byte[] { 1, 2, 3 }));
+
+        var request = new CreateQuizRequest(file.Object, Difficulty.Easy);
 
         vision
             .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
@@ -38,9 +44,9 @@ public class QuizServiceTests
 
         QuizSession? captured = null;
 
-        repo.Setup(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>()))
-            .Callback<QuizSession>(s => captured = s)
-            .ReturnsAsync((QuizSession s) =>
+        repo.Setup(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>()))
+            .Callback<QuizSession, CancellationToken>((s, _) => captured = s)
+            .ReturnsAsync((QuizSession s, CancellationToken _) =>
             {
                 s.Id = 123;
                 int qId = 10, oId = 100;
@@ -60,7 +66,7 @@ public class QuizServiceTests
         // assert - Verify calls
         vision.Verify(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
         openAi.Verify(o => o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>()), Times.Once);
-        repo.Verify(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>()), Times.Once);
+        repo.Verify(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>()), Times.Once);
 
         // assert - Mapping and Trimming logic
         Assert.NotNull(captured);
@@ -84,8 +90,13 @@ public class QuizServiceTests
         var repo = new Mock<IQuizRepository>();
 
         var shortText = "Too short"; // Under 50 char
-        var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("fake image"));
-        var request = new CreateQuizRequest(stream, Difficulty.Easy);
+
+        var file = new Mock<IFormFile>();
+        file.SetupGet(f => f.Length).Returns(1);
+        file.SetupGet(f => f.ContentType).Returns("image/png");
+        file.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(new byte[] { 1, 2, 3 }));
+
+        var request = new CreateQuizRequest(file.Object, Difficulty.Easy);
 
         vision
             .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
