@@ -19,19 +19,40 @@ public class Note2QuizDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // QuizSession → Questions (1-many)
+        // QuizSession → Questions
         modelBuilder.Entity<QuizSession>()
-            .HasMany(q => q.Questions)
+            .HasMany(qs => qs.Questions)
             .WithOne(q => q.QuizSession)
             .HasForeignKey(q => q.QuizSessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Question → Options (1-many)
+        // Question → Options
         modelBuilder.Entity<Question>()
             .HasMany(q => q.Options)
             .WithOne(o => o.Question)
             .HasForeignKey(o => o.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // UserAnswer → Question
+        modelBuilder.Entity<UserAnswer>()
+            .HasOne(ua => ua.Question)
+            .WithMany(q => q.UserAnswers)
+            .HasForeignKey(ua => ua.QuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // UserAnswer → Option
+        modelBuilder.Entity<UserAnswer>()
+            .HasOne(ua => ua.Option)
+            .WithMany()
+            .HasForeignKey(ua => ua.OptionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // UserAnswer → QuizSession
+        modelBuilder.Entity<UserAnswer>()
+            .HasOne(ua => ua.QuizSession)
+            .WithMany(qs => qs.UserAnswers)
+            .HasForeignKey(ua => ua.QuizSessionId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Required fields
         modelBuilder.Entity<QuizSession>()
