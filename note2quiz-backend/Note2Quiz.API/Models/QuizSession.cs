@@ -7,4 +7,5 @@ public class QuizSession
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public List<Question> Questions { get; set; } = new();
+    public List<UserAnswer> UserAnswers { get; set; } = new();
 }
