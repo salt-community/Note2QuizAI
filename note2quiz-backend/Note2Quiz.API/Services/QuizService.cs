@@ -8,7 +8,6 @@ namespace Note2Quiz.API.Services;
 
 public class QuizService : IQuizService
 {
-
     private readonly IQuizRepository _repo;
     private readonly IOpenAIService _openAi;
     private readonly IVisionService _vision;
@@ -20,16 +19,21 @@ public class QuizService : IQuizService
         _vision = vision;
     }
 
-    public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
+    public async Task<QuizResponse> CreateQuizAsync(
+        string userId,
+        CreateQuizRequest request,
+        CancellationToken ct
+    )
     {
-        var text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+        using var imageStream = request.Image.OpenReadStream();
+        var text = await _vision.ExtractTextFromImageAsync(imageStream, ct);
         var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
 
         var session = new QuizSession
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Questions = new List<Question>()
+            Questions = new List<Question>(),
         };
 
         foreach (var ai in aiQuestions)
@@ -38,16 +42,18 @@ public class QuizService : IQuizService
             {
                 Text = ai.Text.Trim(),
                 CreatedAt = DateTime.UtcNow,
-                Options = new List<Option>()
+                Options = new List<Option>(),
             };
 
             for (var index = 0; index < 4; index++)
             {
-                question.Options.Add(new Option
-                {
-                    Text = ai.Options[index].Trim(),
-                    IsCorrect = index == ai.CorrectOptionIndex
-                });
+                question.Options.Add(
+                    new Option
+                    {
+                        Text = ai.Options[index].Trim(),
+                        IsCorrect = index == ai.CorrectOptionIndex,
+                    }
+                );
             }
 
             session.Questions.Add(question);
@@ -57,13 +63,12 @@ public class QuizService : IQuizService
 
         var dto = new QuizResponse(
             QuizSessionId: saved.Id,
-            Questions: saved.Questions
-                .OrderBy(q => q.Id)
+            Questions: saved
+                .Questions.OrderBy(q => q.Id)
                 .Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
-                    Options: q.Options
-                        .OrderBy(o => o.Id)
+                    Options: q.Options.OrderBy(o => o.Id)
                         .Select(o => new OptionDto(o.Id, o.Text))
                         .ToList()
                 ))
@@ -72,5 +77,4 @@ public class QuizService : IQuizService
 
         return dto;
     }
-
 }
