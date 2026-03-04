@@ -28,6 +28,9 @@ public class QuizController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("File is required.");
 
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest("File too large. Max size is 10MB.");
+
         if (file.ContentType is not ("image/jpeg" or "image/png"))
             return BadRequest("Only jpeg or png allowed.");
 
