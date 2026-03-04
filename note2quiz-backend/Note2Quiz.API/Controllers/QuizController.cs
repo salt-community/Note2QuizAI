@@ -42,9 +42,4 @@ public class QuizController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
-    public async Task<ActionResult> get()
-    {
-        return Ok("worked");
-    }
 }
