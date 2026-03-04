@@ -35,9 +35,7 @@ public class QuizController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        await using var stream = file.OpenReadStream();
-
-        var request = new CreateQuizRequest(stream, difficulty);
+        var request = new CreateQuizRequest(file, difficulty);
 
         var result = await _quizService.CreateQuizAsync(userId, request, ct);
 
