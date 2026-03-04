@@ -7,7 +7,7 @@ using Note2Quiz.API.Interfaces;
 namespace Note2Quiz.API.Controllers;
 
 [ApiController]
-[Route("api[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class QuizController : ControllerBase
 {
