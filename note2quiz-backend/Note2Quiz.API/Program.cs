@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
-using Note2Quiz.API.Repositories;
+// using Note2Quiz.API.Repositories;s
 using Note2Quiz.API.Services;
 using Note2Quiz.API.Services.OpenAI;
 
@@ -65,11 +65,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
-    await SeedData.InitializeAsync(db);
-}
+app.MapControllers();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
+//     await SeedData.InitializeAsync(db);
+// }
 
 app.UseHttpsRedirection();
 
