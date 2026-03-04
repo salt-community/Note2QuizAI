@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
-// using Note2Quiz.API.Repositories;s
+using Note2Quiz.API.Repositories;
 using Note2Quiz.API.Services;
 using Note2Quiz.API.Services.OpenAI;
 
@@ -39,11 +39,10 @@ builder.Services.AddSingleton<IChatClient>(sp =>
 });
 
 
-
 builder.Services.AddScoped<IVisionService, VisionService>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
-// builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -72,11 +71,11 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
-//     await SeedData.InitializeAsync(db);
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
+    await SeedData.InitializeAsync(db);
+}
 
 app.UseHttpsRedirection();
 
