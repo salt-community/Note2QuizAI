@@ -8,4 +8,5 @@ public class Question
     public List<Option> Options { get; set; } = new();
     public int QuizSessionId { get; set; }
     public QuizSession? QuizSession { get; set; }
+    public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 }
