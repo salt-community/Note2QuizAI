@@ -1,5 +1,6 @@
 using Azure;
 using Azure.AI.Vision.ImageAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Services;
@@ -35,6 +36,9 @@ builder.Services.AddSingleton<IChatClient>(sp =>
 });
 
 
+builder.Services.AddDbContext<Note2QuizDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddScoped<IVisionService, VisionService>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
@@ -51,8 +55,16 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
-    await SeedData.InitializeAsync(db);
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<Note2QuizDbContext>();
+        await SeedData.InitializeAsync(db);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
 }
 
 app.UseHttpsRedirection();
