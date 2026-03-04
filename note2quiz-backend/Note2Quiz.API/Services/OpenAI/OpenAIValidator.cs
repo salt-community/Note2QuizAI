@@ -4,36 +4,39 @@ public static class OpenAIValidator
 {
     public static void Validate(QuizGenResponse model)
     {
-        if (model.Questions == null)
+        if (model?.Questions == null || model.Questions.Count == 0)
             throw new InvalidOperationException("AI response missing questions.");
 
-        if (model.Questions.Count != 5)
-            throw new InvalidOperationException("AI must return exactly 5 questions.");
-
-        foreach (var q in model.Questions)
+        foreach (var q in model.Questions.ToList())
         {
-            if (string.IsNullOrWhiteSpace(q.Question))
-                throw new InvalidOperationException("Question text is empty.");
-
-            if (q.Options == null || q.Options.Count != 4)
-                throw new InvalidOperationException("Each question must have exactly 4 options.");
-
-            for (var i = 0; i < q.Options.Count; i++)
+            if (string.IsNullOrWhiteSpace(q.Question) ||
+                q.Options == null ||
+                q.Options.Count < 2) //Accept at least 2 options to save the call
             {
-                if (string.IsNullOrWhiteSpace(q.Options[i]))
-                    throw new InvalidOperationException("Options cannot be empty.");
+                model.Questions.Remove(q);
+                continue;
             }
 
-            if (q.CorrectOptionIndex < 0 || q.CorrectOptionIndex > 3)
-                throw new InvalidOperationException("correctOptionIndex must be 0-3.");
+            // Index validation
+            if (q.CorrectOptionIndex < 0 || q.CorrectOptionIndex >= q.Options.Count)
+            {
+                model.Questions.Remove(q);
+                continue;
+            }
 
             var distinctCount = q.Options
-                .Select(x => x.Trim())
+                .Select(x => x?.Trim() ?? "")
+                .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Count();
 
-            if (distinctCount != 4)
-                throw new InvalidOperationException("Options must be distinct.");
+            if (distinctCount != q.Options.Count)
+            {
+                model.Questions.Remove(q);
+            }
         }
+
+        if (model.Questions.Count == 0)
+            throw new InvalidOperationException("No valid questions remained after validation.");
     }
 }
