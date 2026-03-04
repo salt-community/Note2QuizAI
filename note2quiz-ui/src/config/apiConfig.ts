@@ -4,6 +4,6 @@ if(!BASE_URL)
 
 export const API_ENDPOINTS = {
     quiz:{
-        generate:`${BASE_URL}/api/quiz/generate`,
+        generate:`${BASE_URL}/api/quiz/create`,
     }
 }

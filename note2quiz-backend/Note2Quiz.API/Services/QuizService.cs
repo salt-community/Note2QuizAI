@@ -23,11 +23,12 @@ public class QuizService : IQuizService
         CancellationToken ct
     )
     {
+        await using var stream = request.Image.OpenReadStream();
         string text;
 
-        using (request.ImageStream)
+        using (stream)
         {
-            text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+            text = await _vision.ExtractTextFromImageAsync(stream, ct);
         }
 
         if (string.IsNullOrWhiteSpace(text) || text.Length < 50)

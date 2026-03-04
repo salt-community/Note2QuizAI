@@ -7,7 +7,10 @@ public enum Difficulty
     Hard,
 }
 
-public record CreateQuizRequest(Stream ImageStream, Difficulty Difficulty);
+public record CreateQuizRequest(
+    IFormFile Image,
+    Difficulty Difficulty
+);
 
 public record QuizResponse(int QuizSessionId, List<QuestionDto> Questions);
 
