@@ -7,10 +7,15 @@ using Note2Quiz.API.Services.OpenAI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<ImageAnalysisClient>(sp =>
+
+builder.Services.AddSingleton(sp =>
 {
-    var endPoint = builder.Configuration["AzureVision:Endpoint"];
-    var key = builder.Configuration["AzureVision:Key"];
+    var endPoint = builder.Configuration["AzureVision:Endpoint"]
+        ?? throw new InvalidOperationException("Vision Endpoint missing");
+
+    var key = builder.Configuration["AzureVision:Key"]
+        ?? throw new InvalidOperationException("Vision Key missing");
+
     return new ImageAnalysisClient(new Uri(endPoint), new AzureKeyCredential(key));
 });
 
