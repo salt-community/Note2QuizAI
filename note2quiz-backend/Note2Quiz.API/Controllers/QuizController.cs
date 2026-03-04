@@ -1,4 +1,5 @@
 // GET /api/quiz/history
+// POST /api/quiz/submit
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Note2Quiz.API.DTOs;
