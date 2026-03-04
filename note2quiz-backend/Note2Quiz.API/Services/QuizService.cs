@@ -9,13 +9,14 @@ namespace Note2Quiz.API.Services;
 public class QuizService : IQuizService
 {
 
-    private readonly IQuizRepository _repo;
+    // private readonly IQuizRepository _repo;
     private readonly IOpenAIService _openAi;
     private readonly IVisionService _vision;
 
-    public QuizService(IQuizRepository repo, IOpenAIService openAi, IVisionService vision)
+    // public QuizService(IQuizRepository repo, IOpenAIService openAi, IVisionService vision)
+    public QuizService(IOpenAIService openAi, IVisionService vision)
     {
-        _repo = repo;
+        // _repo = repo;
         _openAi = openAi;
         _vision = vision;
     }
