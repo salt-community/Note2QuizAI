@@ -20,11 +20,12 @@ public class QuizService : IQuizService
 
     public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
     {
+        await using var stream = request.Image.OpenReadStream();
         string text;
 
-        using (request.ImageStream)
+        using (stream)
         {
-            text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+            text = await _vision.ExtractTextFromImageAsync(stream, ct);
         }
 
         if (string.IsNullOrWhiteSpace(text) || text.Length < 50)
@@ -50,7 +51,7 @@ public class QuizService : IQuizService
             }).ToList()
         };
 
-        var saved = await _repo.CreateQuizSessionAsync(session);
+        var saved = await _repo.CreateQuizSessionAsync(session, ct);
 
         return new QuizResponse(
             QuizSessionId: saved.Id,

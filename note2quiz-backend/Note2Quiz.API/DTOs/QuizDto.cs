@@ -8,7 +8,7 @@ public enum Difficulty
 }
 
 public record CreateQuizRequest(
-    Stream ImageStream,
+    IFormFile Image,
     Difficulty Difficulty
 );
 

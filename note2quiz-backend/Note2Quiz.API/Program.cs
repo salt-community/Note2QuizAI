@@ -1,8 +1,12 @@
 using Azure;
 using Azure.AI.Vision.ImageAnalysis;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
+using Note2Quiz.API.Repositories;
 using Note2Quiz.API.Services;
 using Note2Quiz.API.Services.OpenAI;
 
@@ -43,8 +47,25 @@ builder.Services.AddDbContext<Note2QuizDbContext>(options =>
 builder.Services.AddScoped<IVisionService, VisionService>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Clerk:Authority"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -52,6 +73,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -68,5 +91,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
