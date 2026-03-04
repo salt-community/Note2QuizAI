@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Note2Quiz.API.Data;
 using Note2Quiz.API.DTOs;
 using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Models;
@@ -23,57 +21,56 @@ public class QuizService : IQuizService
 
     public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
     {
+<<<<<<< HEAD
         await using var stream = request.Image.OpenReadStream();
         var text = await _vision.ExtractTextFromImageAsync(stream, ct);
+=======
+        string text;
+
+        using (request.ImageStream)
+        {
+            text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+        }
+
+        if (string.IsNullOrWhiteSpace(text) || text.Length < 50)
+        {
+            throw new InvalidOperationException("The image does not contain enough readable text to generate a quiz.");
+        }
+
+>>>>>>> 7b39623f300b01265e355bc8ad94dea04fa36a94
         var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
 
         var session = new QuizSession
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Questions = new List<Question>()
-        };
-
-        foreach (var ai in aiQuestions)
-        {
-            var question = new Question
+            Questions = aiQuestions.Select(ai => new Question
             {
                 Text = ai.Text.Trim(),
                 CreatedAt = DateTime.UtcNow,
-                Options = new List<Option>()
-            };
-
-            for (var index = 0; index < 4; index++)
-            {
-                question.Options.Add(new Option
+                Options = ai.Options.Select((optText, index) => new Option
                 {
-                    Text = ai.Options[index].Trim(),
+                    Text = optText.Trim(),
                     IsCorrect = index == ai.CorrectOptionIndex
-                });
-            }
-
-            session.Questions.Add(question);
-        }
+                }).ToList()
+            }).ToList()
+        };
 
         // var saved = await _repo.CreateQuizSessionAsync(session, ct);
         var saved = session;
 
-        var dto = new QuizResponse(
+        return new QuizResponse(
             QuizSessionId: saved.Id,
             Questions: saved.Questions
-                .OrderBy(q => q.Id)
                 .Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
                     Options: q.Options
-                        .OrderBy(o => o.Id)
                         .Select(o => new OptionDto(o.Id, o.Text))
                         .ToList()
                 ))
                 .ToList()
         );
-
-        return dto;
     }
 
 }

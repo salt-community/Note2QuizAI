@@ -13,6 +13,7 @@ public class Note2QuizDbContext : DbContext
     public DbSet<QuizSession> QuizSessions { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<Option> Options { get; set; }
+    public DbSet<UserAnswer> UserAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

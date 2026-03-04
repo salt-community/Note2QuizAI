@@ -14,15 +14,18 @@ public class VisionService : IVisionService
 
     public async Task<string> ExtractTextFromImageAsync(Stream imageStream, CancellationToken ct)
     {
+        var data = await BinaryData.FromStreamAsync(imageStream, ct);
+
         var result = await _client.AnalyzeAsync(
-            BinaryData.FromStream(imageStream),
+            data,
             VisualFeatures.Read,
-            new ImageAnalysisOptions { Language = "en" },
-            ct
+            cancellationToken: ct
         );
-        return string.Join(
-            "\n",
-            result.Value.Read.Blocks.SelectMany(b => b.Lines).Select(l => l.Text)
-        );
+
+        var lines = result.Value.Read.Blocks
+            .SelectMany(b => b.Lines)
+            .Select(l => l.Text);
+
+        return string.Join(" ", lines);
     }
 }
