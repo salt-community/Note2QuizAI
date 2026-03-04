@@ -1,8 +1,8 @@
-using Note2Quiz.API.Models;
+// using Note2Quiz.API.Models;
 
-namespace Note2Quiz.API.Interfaces;
+// namespace Note2Quiz.API.Interfaces;
 
-public interface IQuizRepository
-{
-    Task<QuizSession> CreateQuizSessionAsync(QuizSession session, CancellationToken ct);
-}
+// public interface IQuizRepository
+// {
+//     Task<QuizSession> CreateQuizSessionAsync(QuizSession session, CancellationToken ct);
+// }
