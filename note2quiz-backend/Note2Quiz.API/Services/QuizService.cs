@@ -6,7 +6,6 @@ namespace Note2Quiz.API.Services;
 
 public class QuizService : IQuizService
 {
-
     private readonly IQuizRepository _repo;
     private readonly IOpenAIService _openAi;
     private readonly IVisionService _vision;
@@ -18,7 +17,11 @@ public class QuizService : IQuizService
         _vision = vision;
     }
 
-    public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
+    public async Task<QuizResponse> CreateQuizAsync(
+        string userId,
+        CreateQuizRequest request,
+        CancellationToken ct
+    )
     {
         string text;
 
@@ -29,7 +32,9 @@ public class QuizService : IQuizService
 
         if (string.IsNullOrWhiteSpace(text) || text.Length < 50)
         {
-            throw new InvalidOperationException("The image does not contain enough readable text to generate a quiz.");
+            throw new InvalidOperationException(
+                "The image does not contain enough readable text to generate a quiz."
+            );
         }
 
         var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
@@ -38,32 +43,51 @@ public class QuizService : IQuizService
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Questions = aiQuestions.Select(ai => new Question
-            {
-                Text = ai.Text.Trim(),
-                CreatedAt = DateTime.UtcNow,
-                Options = ai.Options.Select((optText, index) => new Option
+            Questions = aiQuestions
+                .Select(ai => new Question
                 {
-                    Text = optText.Trim(),
-                    IsCorrect = index == ai.CorrectOptionIndex
-                }).ToList()
-            }).ToList()
+                    Text = ai.Text.Trim(),
+                    CreatedAt = DateTime.UtcNow,
+                    Options = ai
+                        .Options.Select(
+                            (optText, index) =>
+                                new Option
+                                {
+                                    Text = optText.Trim(),
+                                    IsCorrect = index == ai.CorrectOptionIndex,
+                                }
+                        )
+                        .ToList(),
+                })
+                .ToList(),
         };
+        //save difficulty as well-- it is needed in front end.
 
-        var saved = await _repo.CreateQuizSessionAsync(session);
+        var saved = await _repo.CreateQuizSessionAsync(session, ct);
 
         return new QuizResponse(
             QuizSessionId: saved.Id,
-            Questions: saved.Questions
-                .Select(q => new QuestionDto(
+            Questions: saved
+                .Questions.Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
-                    Options: q.Options
-                        .Select(o => new OptionDto(o.Id, o.Text))
-                        .ToList()
+                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList()
                 ))
                 .ToList()
         );
     }
 
+    public async Task<List<QuizHistoryItemDto>> GetQuizzesAsync(string userId, CancellationToken ct)
+    {
+        var session = await _repo.GetQuizSessionsByUserIdAsync(userId, ct);
+        return session
+            .Select(s => new QuizHistoryItemDto(
+                QuizSessionId: s.Id,
+                CreatedAt: s.CreatedAt,
+                QuestionCount: s.Questions.Count,
+                Score: s.UserAnswers.Any() ? s.UserAnswers.Count(ua => ua.Option.IsCorrect) : null,
+                Difficulty: s.Difficulty
+            ))
+            .ToList();
+    }
 }

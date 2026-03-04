@@ -4,39 +4,20 @@ public enum Difficulty
 {
     Easy,
     Medium,
-    Hard
+    Hard,
 }
 
-public record CreateQuizRequest(
-    Stream ImageStream,
-    Difficulty Difficulty
-);
+public record CreateQuizRequest(Stream ImageStream, Difficulty Difficulty);
 
-public record QuizResponse(
-    int QuizSessionId,
-    List<QuestionDto> Questions
-);
+public record QuizResponse(int QuizSessionId, List<QuestionDto> Questions);
 
-public record QuestionDto(
-    int Id,
-    string Text,
-    List<OptionDto> Options
-);
+public record QuestionDto(int Id, string Text, List<OptionDto> Options);
 
-public record OptionDto(
-    int OptionId,
-    string OptionText
-);
+public record OptionDto(int OptionId, string OptionText);
 
-public record SubmitQuizRequest(
-    int QuizSessionId,
-    List<AnswerDto> Answers
-);
+public record SubmitQuizRequest(int QuizSessionId, List<AnswerDto> Answers);
 
-public record AnswerDto(
-    int QuestionId,
-    int SelectedOptionId
-);
+public record AnswerDto(int QuestionId, int SelectedOptionId);
 
 public record SubmitQuizResponse(
     int QuizSessionId,
@@ -56,5 +37,6 @@ public record QuizHistoryItemDto(
     int QuizSessionId,
     DateTime CreatedAt,
     int QuestionCount,
-    int? Score
+    int? Score,
+    Difficulty Difficulty
 );

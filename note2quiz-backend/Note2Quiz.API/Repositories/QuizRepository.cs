@@ -1,9 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Note2Quiz.API.Data;
+using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Models;
 
 namespace Note2Quiz.API.Repositories;
 
-public class QuizRepository
+public class QuizRepository : IQuizRepository
 {
     private readonly Note2QuizDbContext _db;
 
@@ -18,5 +20,20 @@ public class QuizRepository
         await _db.SaveChangesAsync(ct);
 
         return session;
+    }
+
+    public async Task<List<QuizSession>> GetQuizSessionsByUserIdAsync(
+        string userId,
+        CancellationToken ct
+    )
+    {
+        return await _db
+            .QuizSessions.Where(q => q.UserId == userId)
+            .Include(q => q.Questions)
+                .ThenInclude(q => q.Options)
+            .Include(q => q.UserAnswers)
+                .ThenInclude(ua => ua.Option)
+            .OrderByDescending(q => q.CreatedAt)
+            .ToListAsync(ct);
     }
 }
