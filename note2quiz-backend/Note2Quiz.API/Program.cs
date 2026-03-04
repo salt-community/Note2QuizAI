@@ -40,6 +40,7 @@ builder.Services.AddScoped<IOpenAIService, OpenAIService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
 // builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
