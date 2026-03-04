@@ -35,7 +35,7 @@ public class QuizController : ControllerBase
             return Unauthorized();
         if (request.Image == null || request.Image.Length == 0)
             return BadRequest("Image is Required");
-        var result = _quizService.CreateQuizAsync(userId, request, ct);
+        var result = await _quizService.CreateQuizAsync(userId, request, ct);
         return Ok(result);
     }
     
