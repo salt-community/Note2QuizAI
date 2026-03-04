@@ -23,7 +23,8 @@ public class QuizService : IQuizService
 
     public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
     {
-        var text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+        await using var stream = request.Image.OpenReadStream();
+        var text = await _vision.ExtractTextFromImageAsync(stream, ct);
         var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
 
         var session = new QuizSession
