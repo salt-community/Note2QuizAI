@@ -21,15 +21,12 @@ public class QuizService : IQuizService
 
     public async Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct)
     {
-<<<<<<< HEAD
         await using var stream = request.Image.OpenReadStream();
-        var text = await _vision.ExtractTextFromImageAsync(stream, ct);
-=======
         string text;
 
-        using (request.ImageStream)
+        using (stream)
         {
-            text = await _vision.ExtractTextFromImageAsync(request.ImageStream, ct);
+            text = await _vision.ExtractTextFromImageAsync(stream, ct);
         }
 
         if (string.IsNullOrWhiteSpace(text) || text.Length < 50)
@@ -37,7 +34,6 @@ public class QuizService : IQuizService
             throw new InvalidOperationException("The image does not contain enough readable text to generate a quiz.");
         }
 
->>>>>>> 7b39623f300b01265e355bc8ad94dea04fa36a94
         var aiQuestions = await _openAi.GenerateQuizAsync(text, request.Difficulty, ct);
 
         var session = new QuizSession
