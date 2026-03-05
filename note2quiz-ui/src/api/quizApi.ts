@@ -5,7 +5,6 @@ export enum Difficulty {
 	Medium = "Medium",
 	Hard = "Hard"
 }
-<<<<<<< HEAD
 export const uploadImageAndGenerateQuiz = async(
     file:File,
     difficulty: Difficulty,
@@ -13,34 +12,7 @@ export const uploadImageAndGenerateQuiz = async(
 ) =>
 {
     const formData = new FormData();
-    formData.append("file",file);
-    formData.append("difficulty",difficulty);
-    const response = await fetch(
-       API_ENDPOINTS.quiz.generate
-        ,{
-            method:"POST",
-            headers: {
-                    Authorization: `Bearer ${token}`, 
-                    },
-            body:formData,
-        }
-    );
-    if(!response.ok)
-        throw new Error("Failed to generate quiz");
-    return response.json();
-}
-=======
-export interface QuizHistory {
-	quizSessionId: number;
-	createdAt: string;
-	questionCount: number;
-	score?: number;
-	difficulty: Difficulty;
-}
-
-export const uploadImageAndGenerateQuiz = async (file: File, difficulty: Difficulty, token: string) => {
-	const formData = new FormData();
-	formData.append("image", file);
+	formData.append("file", file);
 	formData.append("difficulty", difficulty);
     const newToken = token.trim();
 	const response = await fetch(API_ENDPOINTS.quiz.generate, {
@@ -52,7 +24,16 @@ export const uploadImageAndGenerateQuiz = async (file: File, difficulty: Difficu
 	});
 	if (!response.ok) throw new Error("Failed to generate quiz");
 	return response.json();
-};
+}
+
+export interface QuizHistory {
+	quizSessionId: number;
+	createdAt: string;
+	questionCount: number;
+	score?: number;
+	difficulty: Difficulty;
+}
+
 export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
     const newToken = token.trim();
     console.log("toke.....",newToken);
@@ -65,4 +46,3 @@ export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
 	if (!response.ok) throw new Error("Failed to get quiz history");
 	return response.json();
 };
->>>>>>> a22aebc5e52c6d25f6230ad355626b293342be85
