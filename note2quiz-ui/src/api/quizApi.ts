@@ -12,7 +12,7 @@ export const uploadImageAndGenerateQuiz = async(
 ) =>
 {
     const formData = new FormData();
-    formData.append("image",file);
+    formData.append("file",file);
     formData.append("difficulty",difficulty);
     const response = await fetch(
        API_ENDPOINTS.quiz.generate
