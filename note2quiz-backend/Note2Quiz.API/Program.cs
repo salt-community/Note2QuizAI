@@ -1,9 +1,9 @@
 using Azure;
 using Azure.AI.Vision.ImageAnalysis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using Note2Quiz.API.Data;
 using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Repositories;
@@ -12,37 +12,51 @@ using Note2Quiz.API.Services.OpenAI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddSingleton(sp =>
 {
-    var endPoint = builder.Configuration["AzureVision:Endpoint"]
+    var endPoint =
+        builder.Configuration["AzureVision:Endpoint"]
         ?? throw new InvalidOperationException("Vision Endpoint missing");
 
-    var key = builder.Configuration["AzureVision:Key"]
+    var key =
+        builder.Configuration["AzureVision:Key"]
         ?? throw new InvalidOperationException("Vision Key missing");
 
     return new ImageAnalysisClient(new Uri(endPoint), new AzureKeyCredential(key));
 });
 
-
 builder.Services.AddSingleton<IChatClient>(sp =>
 {
-    var endpoint = builder.Configuration["AzureOpenAI:Endpoint"]
+    var endpoint =
+        builder.Configuration["AzureOpenAI:Endpoint"]
         ?? throw new InvalidOperationException("AzureOpenAI:Endpoint is missing in configuration.");
 
-    var apiKey = builder.Configuration["AzureOpenAI:ApiKey"]
+    var apiKey =
+        builder.Configuration["AzureOpenAI:ApiKey"]
         ?? throw new InvalidOperationException("AzureOpenAI:ApiKey is missing in configuration.");
 
-    var deployment = builder.Configuration["AzureOpenAI:DeploymentName"]
-        ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName is missing in configuration.");
+    var deployment =
+        builder.Configuration["AzureOpenAI:DeploymentName"]
+        ?? throw new InvalidOperationException(
+            "AzureOpenAI:DeploymentName is missing in configuration."
+        );
 
     return new AzureChatClient(endpoint, apiKey, deployment);
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:8080").AllowAnyHeader().AllowAnyMethod();
+        }
+    );
+});
 
 builder.Services.AddDbContext<Note2QuizDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder.Services.AddScoped<IVisionService, VisionService>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>();
@@ -52,16 +66,20 @@ builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.Authority = builder.Configuration["Clerk:Authority"];
+        options.Audience = builder.Configuration["Clerk:Audience"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = false,
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Clerk:Audience"],
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            NameClaimType = "sub",
         };
     });
 
@@ -73,6 +91,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+app.UseCors("AllowFrontend");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
@@ -91,8 +112,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.Run();

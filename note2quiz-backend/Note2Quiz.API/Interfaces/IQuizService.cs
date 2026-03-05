@@ -5,6 +5,11 @@ namespace Note2Quiz.API.Interfaces;
 
 public interface IQuizService
 {
-    Task<QuizResponse> CreateQuizAsync(string userId, CreateQuizRequest request, CancellationToken ct);
+    Task<QuizResponse> CreateQuizAsync(
+        string userId,
+        CreateQuizRequest request,
+        CancellationToken ct
+    );
 
+    Task<List<QuizHistoryItemDto>> GetQuizzesAsync(string userId, CancellationToken ct);
 }
