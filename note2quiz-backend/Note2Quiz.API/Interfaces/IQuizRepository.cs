@@ -5,4 +5,5 @@ namespace Note2Quiz.API.Interfaces;
 public interface IQuizRepository
 {
     Task<QuizSession> CreateQuizSessionAsync(QuizSession session, CancellationToken ct);
+    Task<List<QuizSession>> GetQuizSessionsByUserIdAsync(string userId, CancellationToken ct);
 }

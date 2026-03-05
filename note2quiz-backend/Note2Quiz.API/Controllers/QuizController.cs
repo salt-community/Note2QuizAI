@@ -1,5 +1,6 @@
 // GET /api/quiz/history
 // POST /api/quiz/submit
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Note2Quiz.API.DTOs;
@@ -24,7 +25,8 @@ public class QuizController : ControllerBase
     public async Task<ActionResult<QuizResponse>> Create(
         [FromForm] IFormFile file,
         [FromForm] Difficulty difficulty,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         if (file == null || file.Length == 0)
             return BadRequest("File is required.");
@@ -46,4 +48,18 @@ public class QuizController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("history")]
+    public async Task<ActionResult<List<QuizHistoryItemDto>>> GetQuizHistory(CancellationToken ct)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+            return Unauthorized();
+        var result = await _quizService.GetQuizzesAsync(userId, ct);
+        return Ok(result);
+    }
+    [HttpGet("me")]
+    public async Task<IActionResult> me()
+    {
+        return Ok("authentication works");
+    }
 }

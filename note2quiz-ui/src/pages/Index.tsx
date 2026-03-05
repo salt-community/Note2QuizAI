@@ -6,16 +6,29 @@ import Header from "@/components/Header";
 import StatsCard from "@/components/StatsCard";
 import QuizCard from "@/components/QuizCard";
 import EmptyState from "@/components/EmptyState";
+import { useAuth } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
+import { quizHistory } from "@/api/quizApi";
 
-const sampleQuizzes = [
-  { id: "1", title: "Biology Chapter 5: Cell Division", date: "Feb 25, 2026", difficulty: "Medium" as const, score: 85, questionCount: 10 },
-  { id: "2", title: "History: World War II Key Events", date: "Feb 24, 2026", difficulty: "Hard" as const, score: 72, questionCount: 15 },
-  { id: "3", title: "Math: Linear Algebra Basics", date: "Feb 23, 2026", difficulty: "Easy" as const, score: 95, questionCount: 8 },
-  { id: "4", title: "Chemistry: Organic Reactions", date: "Feb 22, 2026", difficulty: "Hard" as const, questionCount: 12 },
-];
+// const sampleQuizzes = [
+//   { id: "1", title: "Biology Chapter 5: Cell Division", date: "Feb 25, 2026", difficulty: "Medium" as const, score: 85, questionCount: 10 },
+//   { id: "2", title: "History: World War II Key Events", date: "Feb 24, 2026", difficulty: "Hard" as const, score: 72, questionCount: 15 },
+//   { id: "3", title: "Math: Linear Algebra Basics", date: "Feb 23, 2026", difficulty: "Easy" as const, score: 95, questionCount: 8 },
+//   { id: "4", title: "Chemistry: Organic Reactions", date: "Feb 22, 2026", difficulty: "Hard" as const, questionCount: 12 },
+// ];
 
 const Index = () => {
-  const hasQuizzes = sampleQuizzes.length > 0;
+  const {getToken} = useAuth();
+  const {data:quizzes,isLoading,isError} = useQuery({
+    queryKey: ["quizHistory"],
+    queryFn:async() =>{
+      const token = await getToken();
+      if(!token) throw new Error("Token not available");
+      return quizHistory(token);
+    }
+  })
+
+const hasQuizzes = quizzes && quizzes.length > 0
 
   return (
     <div className="min-h-screen">
@@ -51,8 +64,17 @@ const Index = () => {
               <h2 className="font-display text-lg font-semibold">Quiz History</h2>
             </div>
             <div className="flex flex-col gap-3">
-              {sampleQuizzes.map((quiz, i) => (
-                <QuizCard key={quiz.id} {...quiz} index={i} />
+              {quizzes?.map((quiz, i) => (
+                 <QuizCard
+                    key={quiz.quizSessionId}
+                    id={quiz.quizSessionId.toString()}
+                    title={`Quiz ${quiz.quizSessionId}`}
+                    date={new Date(quiz.createdAt).toLocaleDateString()}
+                    difficulty={quiz.difficulty}
+                    score={quiz.score}
+                    questionCount={quiz.questionCount}
+                    index={i}
+                  />
               ))}
             </div>
           </>

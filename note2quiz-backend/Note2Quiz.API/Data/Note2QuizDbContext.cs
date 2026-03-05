@@ -66,5 +66,6 @@ public class Note2QuizDbContext : DbContext
         modelBuilder.Entity<Option>()
             .Property(x => x.Text)
             .IsRequired();
+            
     }
 }
