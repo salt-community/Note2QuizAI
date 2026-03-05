@@ -37,7 +37,7 @@ public class QuizController : ControllerBase
         if (file.ContentType is not ("image/jpeg" or "image/png"))
             return BadRequest("Only jpeg or png allowed.");
 
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
             return Unauthorized();
 
