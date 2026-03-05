@@ -1,5 +1,6 @@
 // GET /api/quiz/history
 // POST /api/quiz/submit
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Note2Quiz.API.DTOs;
@@ -50,10 +51,15 @@ public class QuizController : ControllerBase
     [HttpGet("history")]
     public async Task<ActionResult<List<QuizHistoryItemDto>>> GetQuizHistory(CancellationToken ct)
     {
-        var userId = User.FindFirst("sub")?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
             return Unauthorized();
         var result = await _quizService.GetQuizzesAsync(userId, ct);
         return Ok(result);
+    }
+    [HttpGet("me")]
+    public async Task<IActionResult> me()
+    {
+        return Ok("authentication works");
     }
 }
