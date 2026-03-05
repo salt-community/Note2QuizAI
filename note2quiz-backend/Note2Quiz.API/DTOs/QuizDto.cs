@@ -40,6 +40,6 @@ public record QuizHistoryItemDto(
     int QuizSessionId,
     DateTime CreatedAt,
     int QuestionCount,
-    int? Score,
-    Difficulty Difficulty
+    int? Score
+    // Difficulty Difficulty
 );

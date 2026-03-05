@@ -44,7 +44,7 @@ public class QuizService : IQuizService
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
-            Difficulty = request.Difficulty,
+            // Difficulty = request.Difficulty,
             Questions = aiQuestions
                 .Select(ai => new Question
                 {
@@ -85,8 +85,8 @@ public class QuizService : IQuizService
                 QuizSessionId: s.Id,
                 CreatedAt: s.CreatedAt,
                 QuestionCount: s.Questions.Count,
-                Score: s.UserAnswers.Any() ? s.UserAnswers.Count(ua => ua.Option.IsCorrect) : null,
-                Difficulty: s.Difficulty
+                Score: s.UserAnswers.Any() ? s.UserAnswers.Count(ua => ua.Option.IsCorrect) : null
+                // Difficulty: s.Difficulty
             ))
             .ToList();
     }
