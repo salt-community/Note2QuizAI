@@ -44,6 +44,7 @@ public class QuizService : IQuizService
         {
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
+            Difficulty = request.Difficulty,
             Questions = aiQuestions
                 .Select(ai => new Question
                 {
@@ -62,8 +63,6 @@ public class QuizService : IQuizService
                 })
                 .ToList(),
         };
-        //save difficulty as well-- it is needed in front end.
-
         var saved = await _repo.CreateQuizSessionAsync(session, ct);
 
         return new QuizResponse(
