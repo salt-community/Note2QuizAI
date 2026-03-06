@@ -36,4 +36,14 @@ public class QuizRepository : IQuizRepository
             .OrderByDescending(q => q.CreatedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<QuizSession?> GetQuizSessionForSubmitAsync(int quizSessionId, CancellationToken ct)
+    {
+        return await _db.QuizSessions
+            .AsNoTracking()
+            .Include(s => s.Questions)
+            .ThenInclude(q => q.Options)
+            .FirstOrDefaultAsync(s => s.Id == quizSessionId, ct);
+    }
+
 }
