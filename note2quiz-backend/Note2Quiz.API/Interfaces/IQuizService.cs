@@ -12,4 +12,10 @@ public interface IQuizService
     );
 
     Task<List<QuizHistoryItemDto>> GetQuizzesAsync(string userId, CancellationToken ct);
+
+    Task<SubmitQuizResponse> SubmitQuizAsync(
+        string userId,
+        SubmitQuizRequest request,
+        CancellationToken ct
+    );
 }
