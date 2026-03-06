@@ -4,6 +4,12 @@ public static class OpenAIValidator
 {
     public static void Validate(QuizGenResponse model)
     {
+        if (model == null)
+            throw new InvalidOperationException("AI response was null.");
+
+        if (string.IsNullOrWhiteSpace(model.Title))
+            model.Title = "Untitled Quiz";
+
         if (model?.Questions == null || model.Questions.Count == 0)
             throw new InvalidOperationException("AI response missing questions.");
 
