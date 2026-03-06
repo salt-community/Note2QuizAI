@@ -7,14 +7,11 @@ import Header from "@/components/Header";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import { quizSession } from "@/api/quizApi";
-
-interface Question {
-	id: number;
-	question: string;
-	options: string[];
-	correct: number;
-}
+import {
+	quizSession,
+	submitQuiz,
+	type SubmitQuizResponse
+} from "@/api/quizApi";
 
 const QuizPage = () => {
 	const { id } = useParams();
