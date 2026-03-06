@@ -55,6 +55,30 @@ export interface QuizHistory {
 	difficulty: Difficulty;
 }
 
+export const uploadImageAndGenerateQuiz = async (
+	file: File,
+	difficulty: Difficulty,
+	token: string
+): Promise<QuizResponse> => {
+	const formData = new FormData();
+	formData.append("file", file);
+	formData.append("difficulty", difficulty);
+
+	const response = await fetch(API_ENDPOINTS.quiz.generate, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${token.trim()}`
+		},
+		body: formData
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to generate quiz");
+	}
+
+	return response.json();
+};
+
 export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
     const newToken = token.trim();
     console.log("toke.....",newToken);
