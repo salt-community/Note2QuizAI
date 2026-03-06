@@ -7,16 +7,13 @@ public enum Difficulty
     Hard,
 }
 
-public record CreateQuizRequest(
-    IFormFile Image,
-    Difficulty Difficulty
-);
+public record CreateQuizRequest(IFormFile Image, Difficulty Difficulty);
 
 public record QuizResponse(int QuizSessionId, List<QuestionDto> Questions);
 
 public record QuestionDto(int Id, string Text, List<OptionDto> Options);
 
-public record OptionDto(int OptionId, string OptionText);
+public record OptionDto(int OptionId, string OptionText, bool IsCorrect);
 
 public record SubmitQuizRequest(int QuizSessionId, List<AnswerDto> Answers);
 
@@ -41,5 +38,5 @@ public record QuizHistoryItemDto(
     DateTime CreatedAt,
     int QuestionCount,
     int? Score
-    // Difficulty Difficulty
+// Difficulty Difficulty
 );

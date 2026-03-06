@@ -46,3 +46,14 @@ export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
 	if (!response.ok) throw new Error("Failed to get quiz history");
 	return response.json();
 };
+export const quizSession = async (id:number,token:string) =>{
+    const newToken = token.trim();
+    const response = await fetch(API_ENDPOINTS.quiz.quizSession(id),{
+        method:"GET",
+        headers:{
+            Authorization: `Bearer ${newToken}`
+        }
+    });
+    if(!response.ok) throw new Error("Failed to get quiz Session");
+    return response.json();
+}
