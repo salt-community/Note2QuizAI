@@ -157,7 +157,7 @@ const QuizPage = () => {
 							})}
 						</div>
 
-						<div className="mt-8 flex gap-3">
+						<div className="mt-8 flex flex-wrap gap-3">
 							<Button variant="outline" asChild>
 								<Link to="/">
 									<RotateCcw className="h-4 w-4" />
