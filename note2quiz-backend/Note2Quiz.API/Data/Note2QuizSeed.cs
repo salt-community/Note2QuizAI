@@ -1,5 +1,6 @@
 using Note2Quiz.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Note2Quiz.API.DTOs;
 
 namespace Note2Quiz.API.Data;
 
@@ -14,6 +15,9 @@ public static class SeedData
         {
             UserId = "seed-user",
             CreatedAt = DateTime.UtcNow,
+            Difficulty = Difficulty.Easy,
+            Title = "General Knowledge Quiz",
+
             Questions = new List<Question>
             {
                 new Question
