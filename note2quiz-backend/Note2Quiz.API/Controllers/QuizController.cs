@@ -64,7 +64,9 @@ public class QuizController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
             return Unauthorized();
-        var result = await _quizService.GetQuizzAsync(userId, quizSessionId, ct);
+
+        var result = await _quizService.GetQuizAsync(userId, quizSessionId, ct);
+
         return Ok(result);
     }
 

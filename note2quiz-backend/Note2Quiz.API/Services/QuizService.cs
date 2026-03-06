@@ -78,7 +78,7 @@ public class QuizService : IQuizService
         );
     }
 
-    public async Task<QuizResponse> GetQuizzAsync(
+    public async Task<QuizResponse> GetQuizAsync(
         string userId,
         int quizSessionId,
         CancellationToken ct
