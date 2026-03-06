@@ -15,9 +15,7 @@ public static class OpenAIValidator
 
         foreach (var q in model.Questions.ToList())
         {
-            if (string.IsNullOrWhiteSpace(q.Question) ||
-                q.Options == null ||
-                q.Options.Count < 2) //Accept at least 2 options to save the call
+            if (string.IsNullOrWhiteSpace(q.Question) || q.Options == null || q.Options.Count < 2) //Accept at least 2 options to save the call
             {
                 model.Questions.Remove(q);
                 continue;
@@ -30,8 +28,8 @@ public static class OpenAIValidator
                 continue;
             }
 
-            var distinctCount = q.Options
-                .Select(x => x?.Trim() ?? "")
+            var distinctCount = q
+                .Options.Select(x => x?.Trim() ?? "")
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Count();
