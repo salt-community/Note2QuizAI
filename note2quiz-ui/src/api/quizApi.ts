@@ -91,14 +91,41 @@ export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
 	if (!response.ok) throw new Error("Failed to get quiz history");
 	return response.json();
 };
-export const quizSession = async (id:number,token:string) =>{
-    const newToken = token.trim();
-    const response = await fetch(API_ENDPOINTS.quiz.quizSession(id),{
-        method:"GET",
-        headers:{
-            Authorization: `Bearer ${newToken}`
-        }
-    });
-    if(!response.ok) throw new Error("Failed to get quiz Session");
-    return response.json();
-}
+
+export const quizSession = async (
+	id: number,
+	token: string
+): Promise<QuizResponse> => {
+	const response = await fetch(API_ENDPOINTS.quiz.quizSession(id), {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${token.trim()}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to get quiz session");
+	}
+
+	return response.json();
+};
+
+export const submitQuiz = async (
+	payload: SubmitQuizRequest,
+	token: string
+): Promise<SubmitQuizResponse> => {
+	const response = await fetch(API_ENDPOINTS.quiz.submit, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${token.trim()}`
+		},
+		body: JSON.stringify(payload)
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to submit quiz");
+	}
+
+	return response.json();
+};
