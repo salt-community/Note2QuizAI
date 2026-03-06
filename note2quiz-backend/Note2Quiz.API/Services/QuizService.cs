@@ -86,8 +86,94 @@ public class QuizService : IQuizService
                 CreatedAt: s.CreatedAt,
                 QuestionCount: s.Questions.Count,
                 Score: s.UserAnswers.Any() ? s.UserAnswers.Count(ua => ua.Option.IsCorrect) : null
-                // Difficulty: s.Difficulty
+            // Difficulty: s.Difficulty
             ))
             .ToList();
+    }
+
+    public async Task<SubmitQuizResponse> SubmitQuizAsync(
+        string userId,
+        SubmitQuizRequest request,
+        CancellationToken ct)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        if (request.QuizSessionId <= 0)
+            throw new ArgumentException("QuizSessionId is invalid", nameof(request.QuizSessionId));
+
+        if (request.Answers == null || request.Answers.Count == 0)
+            throw new ArgumentException("Answers are required.", nameof(request.Answers));
+
+        var session = await _repo.GetQuizSessionForSubmitAsync(request.QuizSessionId, ct);
+
+        if (session == null)
+            throw new InvalidOperationException("Quiz session not found.");
+
+        if (session.UserId != userId)
+            throw new UnauthorizedAccessException("This quiz session does not belong to the current user.");
+
+        if (request.Answers.Count != session.Questions.Count)
+            throw new InvalidOperationException("Answers must include exactly one answer per question.");
+
+        var duplicateQuestionIds = request.Answers
+            .GroupBy(a => a.QuestionId)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateQuestionIds.Count > 0)
+            throw new InvalidOperationException("Duplicate answers for the same question are not allowed.");
+
+        var questionIds = session.Questions.Select(q => q.Id).ToHashSet();
+        var answerQuestionIds = request.Answers.Select(a => a.QuestionId).ToHashSet();
+
+        if (!questionIds.SetEquals(answerQuestionIds))
+            throw new InvalidOperationException("Answers must include exactly one answer per question.");
+
+        var userAnswers = new List<UserAnswer>();
+        var results = new List<QuestionResultDto>();
+        var score = 0;
+
+        foreach (var answer in request.Answers)
+        {
+            var question = session.Questions.First(q => q.Id == answer.QuestionId);
+
+            var selected = question.Options.FirstOrDefault(o => o.Id == answer.SelectedOptionId);
+            if (selected == null)
+                throw new InvalidOperationException("Selected option does not belong to the question.");
+
+            var correct = question.Options.FirstOrDefault(o => o.IsCorrect);
+            if (correct == null)
+                throw new InvalidOperationException("Question has no correct option configured.");
+
+            var isCorrect = selected.Id == correct.Id;
+
+            if (isCorrect)
+                score++;
+
+            userAnswers.Add(new UserAnswer
+            {
+                QuizSessionId = session.Id,
+                QuestionId = question.Id,
+                OptionId = selected.Id
+            });
+
+            results.Add(new QuestionResultDto(
+                QuestionId: question.Id,
+                SelectedOptionId: selected.Id,
+                CorrectOptionId: correct.Id,
+                IsCorrect: isCorrect
+            ));
+        }
+
+        await _repo.ReplaceUserAnswersAsync(session.Id, userAnswers, ct);
+
+        return new SubmitQuizResponse(
+            QuizSessionId: session.Id,
+            Score: score,
+            TotalQuestions: session.Questions.Count,
+            Results: results.OrderBy(r => r.QuestionId).ToList()
+        );
     }
 }
