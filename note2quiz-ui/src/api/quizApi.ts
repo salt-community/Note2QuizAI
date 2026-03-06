@@ -52,7 +52,7 @@ export interface QuizHistory {
 	createdAt: string;
 	questionCount: number;
 	score?: number;
-	difficulty: Difficulty;
+	difficulty?: Difficulty;
 }
 
 export const uploadImageAndGenerateQuiz = async (
@@ -80,15 +80,17 @@ export const uploadImageAndGenerateQuiz = async (
 };
 
 export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
-    const newToken = token.trim();
-    console.log("toke.....",newToken);
 	const response = await fetch(API_ENDPOINTS.quiz.history, {
 		method: "GET",
 		headers: {
-			Authorization: `Bearer ${newToken}`
+			Authorization: `Bearer ${token.trim()}`
 		}
 	});
-	if (!response.ok) throw new Error("Failed to get quiz history");
+
+	if (!response.ok) {
+		throw new Error("Failed to get quiz history");
+	}
+
 	return response.json();
 };
 
