@@ -9,7 +9,6 @@ export enum Difficulty {
 export interface OptionDto {
 	optionId: number;
 	optionText: string;
-	isCorrect?: boolean;
 }
 
 export interface QuestionDto {
