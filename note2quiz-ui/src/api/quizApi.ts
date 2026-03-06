@@ -5,17 +5,14 @@ export enum Difficulty {
 	Medium = "Medium",
 	Hard = "Hard"
 }
-export interface QuizHistory {
-	quizSessionId: number;
-	createdAt: string;
-	questionCount: number;
-	score?: number;
-	difficulty: Difficulty;
-}
-
-export const uploadImageAndGenerateQuiz = async (file: File, difficulty: Difficulty, token: string) => {
-	const formData = new FormData();
-	formData.append("image", file);
+export const uploadImageAndGenerateQuiz = async(
+    file:File,
+    difficulty: Difficulty,
+    token:string
+) =>
+{
+    const formData = new FormData();
+	formData.append("file", file);
 	formData.append("difficulty", difficulty);
     const newToken = token.trim();
 	const response = await fetch(API_ENDPOINTS.quiz.generate, {
@@ -27,7 +24,16 @@ export const uploadImageAndGenerateQuiz = async (file: File, difficulty: Difficu
 	});
 	if (!response.ok) throw new Error("Failed to generate quiz");
 	return response.json();
-};
+}
+
+export interface QuizHistory {
+	quizSessionId: number;
+	createdAt: string;
+	questionCount: number;
+	score?: number;
+	difficulty: Difficulty;
+}
+
 export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
     const newToken = token.trim();
     console.log("toke.....",newToken);
