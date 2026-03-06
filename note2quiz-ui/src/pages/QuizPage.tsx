@@ -89,10 +89,9 @@ const QuizPage = () => {
 
 	const allAnswered = questions.every(question => answers[question.id] !== undefined);
 
-	const allAnswered = Object.keys(answers).length === total;
+	if (submitResult) {
+		const pct = Math.round((submitResult.score / submitResult.totalQuestions) * 100);
 
-	if (submitted) {
-		const pct = Math.round((score / total) * 100);
 		return (
 			<div className="min-h-screen">
 				<Header />
@@ -105,33 +104,52 @@ const QuizPage = () => {
 						<div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent glow-primary">
 							<Trophy className="h-10 w-10 text-primary-foreground" />
 						</div>
+
 						<h1 className="font-display text-3xl font-bold">Quiz Complete!</h1>
 						<p className="mt-2 text-muted-foreground">You scored</p>
 						<p className="mt-1 font-display text-6xl font-bold gradient-text">{pct}%</p>
 						<p className="mt-2 text-muted-foreground">
-							{score} out of {total} correct
+							{submitResult.score} out of {submitResult.totalQuestions} correct
 						</p>
 
 						<div className="mt-8 w-full space-y-3">
-							{q?.map((q, i) => {
-								const correct = q.options.IsCorrect;
+							{questions.map(question => {
+								const result = submitResult.results.find(r => r.questionId === question.id);
+								if (!result) return null;
+
+								const selectedOption = question.options.find(
+									o => o.optionId === result.selectedOptionId
+								);
+
+								const correctOption = question.options.find(
+									o => o.optionId === result.correctOptionId
+								);
+
 								return (
 									<div
-										key={q.id}
+										key={question.id}
 										className={cn(
-											"flex items-center gap-3 rounded-xl border p-4 text-left text-sm",
-											correct ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5"
+											"flex items-start gap-3 rounded-xl border p-4 text-left text-sm",
+											result.isCorrect
+												? "border-success/30 bg-success/5"
+												: "border-destructive/30 bg-destructive/5"
 										)}
 									>
-										{correct ? (
+										{result.isCorrect ? (
 											<CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
 										) : (
 											<XCircle className="h-5 w-5 shrink-0 text-destructive" />
 										)}
+
 										<div>
-											<p className="font-medium">{q.question}</p>
-											{!correct && (
-												<p className="mt-0.5 text-xs text-muted-foreground">Correct: {q.options[q.correct]}</p>
+											<p className="font-medium">{question.text}</p>
+											<p className="mt-1 text-xs text-muted-foreground">
+												Your answer: {selectedOption?.optionText ?? "Unknown"}
+											</p>
+											{!result.isCorrect && (
+												<p className="mt-0.5 text-xs text-muted-foreground">
+													Correct: {correctOption?.optionText ?? "Unknown"}
+												</p>
 											)}
 										</div>
 									</div>
@@ -142,9 +160,11 @@ const QuizPage = () => {
 						<div className="mt-8 flex gap-3">
 							<Button variant="outline" asChild>
 								<Link to="/">
-									<RotateCcw className="h-4 w-4" /> Back to Dashboard
+									<RotateCcw className="h-4 w-4" />
+									Back to Dashboard
 								</Link>
 							</Button>
+
 							<Button variant="glow" asChild>
 								<Link to="/upload">Create Another Quiz</Link>
 							</Button>
@@ -159,7 +179,6 @@ const QuizPage = () => {
 		<div className="min-h-screen">
 			<Header />
 			<main className="container max-w-xl py-12">
-				{/* Progress */}
 				<div className="mb-8">
 					<div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
 						<span>
@@ -167,6 +186,7 @@ const QuizPage = () => {
 						</span>
 						<span>{Object.keys(answers).length} answered</span>
 					</div>
+
 					<div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
 						<motion.div
 							className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
@@ -176,6 +196,7 @@ const QuizPage = () => {
 						/>
 					</div>
 				</div>
+
 				<AnimatePresence mode="wait">
 					<motion.div
 						key={current}
@@ -185,14 +206,15 @@ const QuizPage = () => {
 						transition={{ duration: 0.25 }}
 					>
 						<h2 className="mb-6 font-display text-xl font-semibold">{q.text}</h2>
+
 						<div className="flex flex-col gap-3">
 							{q.options.map((option, i) => (
 								<button
 									key={option.optionId}
-									onClick={() => selectAnswer(i)}
+									onClick={() => selectAnswer(q.id, option.optionId)}
 									className={cn(
 										"rounded-xl border p-4 text-left text-sm font-medium transition-all",
-										answers[current] === i
+										answers[q.id] === option.optionId
 											? "border-primary bg-primary/10 text-primary"
 											: "border-border bg-card text-foreground hover:border-muted-foreground/50"
 									)}
@@ -209,12 +231,16 @@ const QuizPage = () => {
 
 				<div className="mt-8 flex justify-end gap-3">
 					{current < total - 1 ? (
-						<Button onClick={next} disabled={answers[current] === undefined}>
+						<Button onClick={next} disabled={answers[q.id] === undefined}>
 							Next <ArrowRight className="h-4 w-4" />
 						</Button>
 					) : (
-						<Button variant="glow" onClick={handleSubmit} disabled={!allAnswered}>
-							Submit Quiz
+						<Button
+							variant="glow"
+							onClick={handleSubmit}
+							disabled={!allAnswered || submitMutation.isPending}
+						>
+							{submitMutation.isPending ? "Submitting..." : "Submit Quiz"}
 						</Button>
 					)}
 				</div>
