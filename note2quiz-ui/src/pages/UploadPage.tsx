@@ -42,7 +42,7 @@ const UploadPage = () => {
             return uploadImageAndGenerateQuiz(file, difficulty,token);
           },
           onSuccess: (data) => {
-            navigate(`/quiz/${data.id}`);
+            navigate(`/quiz/${data.quizSessionId}`);
           },
           onError: (error) => {
             console.error(error);
