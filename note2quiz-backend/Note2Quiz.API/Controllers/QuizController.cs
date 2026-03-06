@@ -51,9 +51,12 @@ public class QuizController : ControllerBase
     public async Task<ActionResult<List<QuizHistoryItemDto>>> GetQuizHistory(CancellationToken ct)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userId == null)
             return Unauthorized();
+
         var result = await _quizService.GetQuizzesAsync(userId, ct);
+
         return Ok(result);
     }
 
@@ -62,6 +65,7 @@ public class QuizController : ControllerBase
     public async Task<ActionResult<QuizResponse>> GetQuiz(int quizSessionId, CancellationToken ct)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userId == null)
             return Unauthorized();
 

@@ -71,7 +71,7 @@ public class QuizService : IQuizService
                 .Questions.Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
-                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect))
+                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text))
                         .ToList()
                 ))
                 .ToList()
@@ -85,15 +85,18 @@ public class QuizService : IQuizService
     )
     {
         var session = await _repo.GetQuizSessionById(userId, quizSessionId, ct);
+
         if (session == null)
             throw new Exception("Quiz not found");
+
         var questions = session
             .Questions.Select(q => new QuestionDto(
                 q.Id,
                 q.Text,
-                q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect)).ToList()
+                q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList()
             ))
             .ToList();
+
         return new QuizResponse(session.Id, questions);
     }
 
