@@ -15,7 +15,7 @@ const Header = () => {
             <Zap className="absolute -right-1 -top-1 h-3.5 w-3.5 text-warning" />
           </div>
           <span className="font-display text-xl font-bold tracking-tight ">
-            Note<span className="gradient-text">2Quiz</span>
+            Note<span className="gradient-text">2QuizAI</span>
           </span>
         </Link>
 

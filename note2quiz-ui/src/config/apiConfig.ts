@@ -3,7 +3,7 @@ if (!BASE_URL) throw new Error("Base URL not defined!");
 
 export const API_ENDPOINTS = {
 	quiz: {
-		generate: `${BASE_URL}/api/quiz/create`,
+		generate: `${BASE_URL}/api/quiz`,
 		history: `${BASE_URL}/api/quiz/history`
 	}
 };
