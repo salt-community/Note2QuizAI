@@ -34,24 +34,60 @@ const QuizPage = () => {
 		},
 		enabled: !!id
 	});
-	if (isLoading) return <Loader2 className="h-4 w-4 animate-spin" />;
-	if (isError || !quiz) return <div>Error loading quiz</div>;
-	const questions = quiz?.questions;
-	const total = questions?.length;
+
+	const submitMutation = useMutation({
+		mutationFn: async () => {
+			const token = await getToken();
+			if (!token) throw new Error("Token not available");
+			if (!quiz) throw new Error("Quiz not loaded");
+
+			const payload = {
+				quizSessionId: quiz.quizSessionId,
+				answers: quiz.questions.map(question => ({
+					questionId: question.id,
+					selectedOptionId: answers[question.id]
+				}))
+			};
+
+			return submitQuiz(payload, token);
+		},
+		onSuccess: result => {
+			setSubmitResult(result);
+		}
+	});
+
+	if (isLoading) {
+		return <Loader2 className="h-4 w-4 animate-spin" />;
+	}
+
+	if (isError || !quiz) {
+		return <div>Error loading quiz</div>;
+	}
+
+	const questions = quiz.questions;
+	const total = questions.length;
 	const q = questions[current];
 
-	const selectAnswer = (optionIndex: number) => {
-		if (submitted) return;
-		setAnswers(prev => ({ ...prev, [current]: optionIndex }));
+	const selectAnswer = (questionId: number, optionId: number) => {
+		if (submitResult) return;
+
+		setAnswers(prev => ({
+			...prev,
+			[questionId]: optionId
+		}));
 	};
 
 	const next = () => {
-		if (current < total - 1) setCurrent(c => c + 1);
+		if (current < total - 1) {
+			setCurrent(c => c + 1);
+		}
 	};
 
-	const handleSubmit = () => setSubmitted(true);
+	const handleSubmit = () => {
+		submitMutation.mutate();
+	};
 
-	// const score = submitted ? sampleQuestions.filter((q, i) => answers[i] === q.correct).length : 0;
+	const allAnswered = questions.every(question => answers[question.id] !== undefined);
 
 	const allAnswered = Object.keys(answers).length === total;
 
