@@ -12,7 +12,7 @@ using Note2Quiz.API.Data;
 namespace Note2Quiz.API.Migrations
 {
     [DbContext(typeof(Note2QuizDbContext))]
-    [Migration("20260304141840_InitialCreate")]
+    [Migration("20260306095944_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -85,6 +85,13 @@ namespace Note2Quiz.API.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
