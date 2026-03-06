@@ -16,9 +16,10 @@ import {
 const QuizPage = () => {
 	const { id } = useParams();
 	const { getToken } = useAuth();
+
 	const [current, setCurrent] = useState(0);
 	const [answers, setAnswers] = useState<Record<number, number>>({});
-	const [submitted, setSubmitted] = useState(false);
+	const [submitResult, setSubmitResult] = useState<SubmitQuizResponse | null>(null);
 
 	const {
 		data: quiz,
@@ -30,7 +31,8 @@ const QuizPage = () => {
 			const token = await getToken();
 			if (!token) throw new Error("Token not available");
 			return quizSession(Number(id), token);
-		}
+		},
+		enabled: !!id
 	});
 	if (isLoading) return <Loader2 className="h-4 w-4 animate-spin" />;
 	if (isError || !quiz) return <div>Error loading quiz</div>;
