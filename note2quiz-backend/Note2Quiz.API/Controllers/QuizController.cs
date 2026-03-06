@@ -1,4 +1,3 @@
-// GET /api/quiz/history
 // POST /api/quiz/submit
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
@@ -55,6 +54,17 @@ public class QuizController : ControllerBase
         if (userId == null)
             return Unauthorized();
         var result = await _quizService.GetQuizzesAsync(userId, ct);
+        return Ok(result);
+    }
+
+
+    [HttpGet("{quizSessionId}")]
+    public async Task<ActionResult<QuizResponse>> GetQuiz(int quizSessionId, CancellationToken ct)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+            return Unauthorized();
+        var result = await _quizService.GetQuizzAsync(userId, quizSessionId, ct);
         return Ok(result);
     }
 

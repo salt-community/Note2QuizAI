@@ -18,4 +18,5 @@ public interface IQuizService
         SubmitQuizRequest request,
         CancellationToken ct
     );
+    Task<QuizResponse> GetQuizzAsync(string userId, int quizSessionId, CancellationToken ct);
 }

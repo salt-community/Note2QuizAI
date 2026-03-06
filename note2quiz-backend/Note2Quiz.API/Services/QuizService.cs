@@ -71,10 +71,30 @@ public class QuizService : IQuizService
                 .Questions.Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
-                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList()
+                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect))
+                        .ToList()
                 ))
                 .ToList()
         );
+    }
+
+    public async Task<QuizResponse> GetQuizzAsync(
+        string userId,
+        int quizSessionId,
+        CancellationToken ct
+    )
+    {
+        var session = await _repo.GetQuizSessionById(userId, quizSessionId, ct);
+        if (session == null)
+            throw new Exception("Quiz not found");
+        var questions = session
+            .Questions.Select(q => new QuestionDto(
+                q.Id,
+                q.Text,
+                q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect)).ToList()
+            ))
+            .ToList();
+        return new QuizResponse(session.Id, questions);
     }
 
     public async Task<List<QuizHistoryItemDto>> GetQuizzesAsync(string userId, CancellationToken ct)

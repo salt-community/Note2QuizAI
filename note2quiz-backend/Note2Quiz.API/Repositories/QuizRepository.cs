@@ -22,6 +22,18 @@ public class QuizRepository : IQuizRepository
         return session;
     }
 
+    public async Task<QuizSession?> GetQuizSessionById(
+        string userId,
+        int quizSessionId,
+        CancellationToken ct
+    )
+    {
+        return await _db
+            .QuizSessions.Include(q => q.Questions)
+                .ThenInclude(q => q.Options)
+            .FirstOrDefaultAsync(q => q.Id == quizSessionId && q.UserId == userId, ct);
+    }
+
     public async Task<List<QuizSession>> GetQuizSessionsByUserIdAsync(
         string userId,
         CancellationToken ct
