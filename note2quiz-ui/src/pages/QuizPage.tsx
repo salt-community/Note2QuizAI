@@ -4,7 +4,11 @@ import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Trophy } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Header from "@/components/Header";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-react";
+import { quizSession } from "@/api/quizApi";
+
 
 interface Question {
   id: number;
@@ -22,11 +26,21 @@ const sampleQuestions: Question[] = [
 ];
 
 const QuizPage = () => {
+  const {id} = useParams();
+  const {getToken} = useAuth();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const total = sampleQuestions.length;
+  const{data:quiz,isLoading,isError} = useQuery({
+    queryKey: ["quizSession", id],
+    queryFn:async() =>{
+      const token = await getToken();
+      if(!token) throw new Error("Token not available");
+      return quizSession(Number(id),token);
+    }
+  })
+  const total = quiz.length;
   const q = sampleQuestions[current];
 
   const selectAnswer = (optionIndex: number) => {
