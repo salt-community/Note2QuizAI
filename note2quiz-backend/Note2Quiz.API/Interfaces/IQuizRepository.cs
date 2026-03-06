@@ -6,4 +6,5 @@ public interface IQuizRepository
 {
     Task<QuizSession> CreateQuizSessionAsync(QuizSession session, CancellationToken ct);
     Task<List<QuizSession>> GetQuizSessionsByUserIdAsync(string userId, CancellationToken ct);
+    Task<QuizSession?> GetQuizSessionForSubmitAsync(int quizSessionId, CancellationToken ct);
 }
