@@ -46,4 +46,9 @@ public class QuizRepository : IQuizRepository
             .FirstOrDefaultAsync(s => s.Id == quizSessionId, ct);
     }
 
+    public async Task SaveUserAnswerAsync(List<UserAnswer> userAnswers, CancellationToken ct)
+    {
+        _db.Set<UserAnswer>().AddRange(userAnswers);
+        await _db.SaveChangesAsync(ct);
+    }
 }
