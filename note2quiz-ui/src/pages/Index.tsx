@@ -21,7 +21,7 @@ const Index = () => {
       return quizHistory(token);
     }
   })
-console.log("-------index page quizzes----",quizzes);
+
 const hasQuizzes = quizzes && quizzes.length > 0
 const scoredQuizzes = quizzes?.filter(q => q.score != null) || [];
 
@@ -37,8 +37,6 @@ const avgScore =
         }, 0) / scoredQuizzes.length
       )
     : 0;
-
-console.log("-------avgScore----",avgScore);
 
   return (
     <div className="min-h-screen">
