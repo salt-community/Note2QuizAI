@@ -2,6 +2,7 @@ using Moq;
 using Note2Quiz.API.DTOs;
 using Note2Quiz.API.Models;
 using Note2Quiz.API.Interfaces;
+using Note2Quiz.API.Services.OpenAI;
 using Microsoft.AspNetCore.Http;
 
 namespace Note2Quiz.API.Services;
@@ -29,18 +30,22 @@ public class QuizServiceTests
             .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validText);
 
-        var aiQuestions = new List<GeneratedQuestion>
+        var aiResponse = new QuizGenResponse
         {
-            new(" Q1 ", new() { " A ", "B", "C", "D" }, 0),
-            new("Q2", new() { "A", " B ", "C", "D" }, 1),
-            new("Q3", new() { "A", "B", " C ", "D" }, 2),
-            new("Q4", new() { "A", "B", "C", " D " }, 3),
-            new("Q5", new() { "A", "B", "C", "D" }, 0),
+            Title = "Test Quiz",
+            Questions =
+            [
+                new() { Question = " Q1 ", Options = [" A ", "B", "C", "D"], CorrectOptionIndex = 0 },
+                new() { Question = "Q2", Options = ["A", " B ", "C", "D"], CorrectOptionIndex = 1 },
+                new() { Question = "Q3", Options = ["A", "B", " C ", "D"], CorrectOptionIndex = 2 },
+                new() { Question = "Q4", Options = ["A", "B", "C", " D "], CorrectOptionIndex = 3 },
+                new() { Question = "Q5", Options = ["A", "B", "C", "D"], CorrectOptionIndex = 0 },
+            ]
         };
 
         openAi
             .Setup(o => o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(aiQuestions);
+            .ReturnsAsync(aiResponse);
 
         QuizSession? captured = null;
 
