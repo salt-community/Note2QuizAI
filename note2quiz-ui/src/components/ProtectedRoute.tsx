@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isLoaded, isSignedIn } = useAuth();
-    console.log("Inside protectedRoute");
+    
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
