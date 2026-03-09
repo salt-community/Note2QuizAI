@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Http;
 using Moq;
 using Note2Quiz.API.DTOs;
-using Note2Quiz.API.Models;
 using Note2Quiz.API.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Note2Quiz.API.Models;
+using Note2Quiz.API.Services.OpenAI;
+using Note2Quiz.API.Services.OpenAI.Models;
 
 namespace Note2Quiz.API.Services;
 
@@ -16,7 +18,8 @@ public class QuizServiceTests
         var openAi = new Mock<IOpenAIService>();
         var repo = new Mock<IQuizRepository>();
 
-        var validText = "This is a long enough source text that should pass the 50 characters validation gatekeeper.";
+        var validText =
+            "This is a long enough source text that should pass the 50 characters validation gatekeeper.";
 
         var file = new Mock<IFormFile>();
         file.SetupGet(f => f.Length).Returns(1);
@@ -26,37 +29,76 @@ public class QuizServiceTests
         var request = new CreateQuizRequest(file.Object, Difficulty.Easy);
 
         vision
-            .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Setup(v =>
+                v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(validText);
 
-        var aiQuestions = new List<GeneratedQuestion>
+        var aiResponse = new QuizGenResponse
         {
-            new(" Q1 ", new() { " A ", "B", "C", "D" }, 0),
-            new("Q2", new() { "A", " B ", "C", "D" }, 1),
-            new("Q3", new() { "A", "B", " C ", "D" }, 2),
-            new("Q4", new() { "A", "B", "C", " D " }, 3),
-            new("Q5", new() { "A", "B", "C", "D" }, 0),
+            Title = "Test Quiz",
+            Questions = new List<QuizGenQuestion>
+            {
+                new QuizGenQuestion
+                {
+                    Question = " Q1 ",
+                    Options = new() { " A ", "B", "C", "D" },
+                    CorrectOptionIndex = 0,
+                },
+                new QuizGenQuestion
+                {
+                    Question = "Q2",
+                    Options = new() { "A", " B ", "C", "D" },
+                    CorrectOptionIndex = 1,
+                },
+                new QuizGenQuestion
+                {
+                    Question = "Q3",
+                    Options = new() { "A", "B", " C ", "D" },
+                    CorrectOptionIndex = 2,
+                },
+                new QuizGenQuestion
+                {
+                    Question = "Q4",
+                    Options = new() { "A", "B", "C", " D " },
+                    CorrectOptionIndex = 3,
+                },
+                new QuizGenQuestion
+                {
+                    Question = "Q5",
+                    Options = new() { "A", "B", "C", "D" },
+                    CorrectOptionIndex = 0,
+                },
+            },
         };
 
         openAi
-            .Setup(o => o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(aiQuestions);
+            .Setup(o =>
+                o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>())
+            )
+            .ReturnsAsync(aiResponse);
 
         QuizSession? captured = null;
 
-        repo.Setup(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>()))
+        repo.Setup(r =>
+                r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>())
+            )
             .Callback<QuizSession, CancellationToken>((s, _) => captured = s)
-            .ReturnsAsync((QuizSession s, CancellationToken _) =>
-            {
-                s.Id = 123;
-                int qId = 10, oId = 100;
-                foreach (var q in s.Questions)
+            .ReturnsAsync(
+                (QuizSession s, CancellationToken _) =>
                 {
-                    q.Id = qId++;
-                    foreach (var o in q.Options) o.Id = oId++;
+                    s.Id = 123;
+                    int qId = 10,
+                        oId = 100;
+                    foreach (var q in s.Questions)
+                    {
+                        q.Id = qId++;
+                        foreach (var o in q.Options)
+                            o.Id = oId++;
+                    }
+                    return s;
                 }
-                return s;
-            });
+            );
 
         var sut = new QuizService(repo.Object, openAi.Object, vision.Object);
 
@@ -64,9 +106,18 @@ public class QuizServiceTests
         var dto = await sut.CreateQuizAsync("user-1", request, CancellationToken.None);
 
         // assert - Verify calls
-        vision.Verify(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
-        openAi.Verify(o => o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>()), Times.Once);
-        repo.Verify(r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>()), Times.Once);
+        vision.Verify(
+            v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+        openAi.Verify(
+            o => o.GenerateQuizAsync(validText, Difficulty.Easy, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+        repo.Verify(
+            r => r.CreateQuizSessionAsync(It.IsAny<QuizSession>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
 
         // assert - Mapping and Trimming logic
         Assert.NotNull(captured);
@@ -99,17 +150,100 @@ public class QuizServiceTests
         var request = new CreateQuizRequest(file.Object, Difficulty.Easy);
 
         vision
-            .Setup(v => v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .Setup(v =>
+                v.ExtractTextFromImageAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(shortText);
 
         var sut = new QuizService(repo.Object, openAi.Object, vision.Object);
 
         // act & assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.CreateQuizAsync("user-1", request, CancellationToken.None));
+            sut.CreateQuizAsync("user-1", request, CancellationToken.None)
+        );
 
         Assert.Contains("enough readable text", ex.Message);
 
-        openAi.Verify(o => o.GenerateQuizAsync(It.IsAny<string>(), It.IsAny<Difficulty>(), It.IsAny<CancellationToken>()), Times.Never);
+        openAi.Verify(
+            o =>
+                o.GenerateQuizAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Difficulty>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task GetQuizAsync_ReturnsQuiz_WhenSessionExists()
+    {
+        // arrange
+        var repo = new Mock<IQuizRepository>();
+        var openAi = new Mock<IOpenAIService>();
+        var vision = new Mock<IVisionService>();
+
+        var session = new QuizSession
+        {
+            Id = 1,
+            UserId = "user-1",
+            Questions = new List<Question>
+            {
+                new Question
+                {
+                    Id = 10,
+                    Text = "What is 2+2?",
+                    Options = new List<Option>
+                    {
+                        new Option
+                        {
+                            Id = 1,
+                            Text = "3",
+                            IsCorrect = false,
+                        },
+                        new Option
+                        {
+                            Id = 2,
+                            Text = "4",
+                            IsCorrect = true,
+                        },
+                        new Option
+                        {
+                            Id = 3,
+                            Text = "5",
+                            IsCorrect = false,
+                        },
+                        new Option
+                        {
+                            Id = 4,
+                            Text = "6",
+                            IsCorrect = false,
+                        },
+                    },
+                },
+            },
+        };
+
+        repo.Setup(r => r.GetQuizSessionById("user-1", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(session);
+
+        var sut = new QuizService(repo.Object, openAi.Object, vision.Object);
+
+        // act
+        var result = await sut.GetQuizzAsync("user-1", 1, CancellationToken.None);
+
+        // assert
+        Assert.NotNull(result);
+        Assert.Equal(1, result.QuizSessionId);
+        Assert.Single(result.Questions);
+
+        var question = result.Questions.First();
+        Assert.Equal("What is 2+2?", question.Text);
+        Assert.Equal(4, question.Options.Count);
+
+        repo.Verify(
+            r => r.GetQuizSessionById("user-1", 1, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 }

@@ -13,12 +13,14 @@ public class OpenAIServiceTests
         // Arrange
         var chat = new Mock<IChatClient>();
 
-        chat.Setup(x => x.GetCompletionAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<ChatSettings>(),
-                It.IsAny<CancellationToken>()
-            ))
+        chat.Setup(x =>
+                x.GetCompletionAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatSettings>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(
                 """
                 {
@@ -36,13 +38,17 @@ public class OpenAIServiceTests
         var sut = new OpenAIService(chat.Object);
 
         // Act
-        var result = await sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None);
+        var result = await sut.GenerateQuizAsync(
+            "some text",
+            Difficulty.Easy,
+            CancellationToken.None
+        );
 
         // Assert
-        Assert.Equal(5, result.Count);
-        foreach (var q in result)
+        Assert.Equal(5, result.Questions.Count);
+        foreach (var q in result.Questions)
         {
-            Assert.False(string.IsNullOrWhiteSpace(q.Text));
+            Assert.False(string.IsNullOrWhiteSpace(q.Question));
             Assert.Equal(4, q.Options.Count);
             Assert.InRange(q.CorrectOptionIndex, 0, 3);
         }
@@ -54,12 +60,14 @@ public class OpenAIServiceTests
         // Arrange
         var chat = new Mock<IChatClient>();
 
-        chat.Setup(x => x.GetCompletionAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<ChatSettings>(),
-                It.IsAny<CancellationToken>()
-            ))
+        chat.Setup(x =>
+                x.GetCompletionAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatSettings>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(
                 """
                 {
@@ -74,12 +82,16 @@ public class OpenAIServiceTests
         var sut = new OpenAIService(chat.Object);
 
         // Act
-        var result = await sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None);
+        var result = await sut.GenerateQuizAsync(
+            "some text",
+            Difficulty.Easy,
+            CancellationToken.None
+        );
 
         // Assert
         // remove Q instead of thowing exception
-        Assert.Single(result);
-        Assert.Equal("Valid Q", result[0].Text);
+        Assert.Single(result.Questions);
+        Assert.Equal("Valid Q", result.Questions[0].Question);
     }
 
     [Fact]
@@ -88,12 +100,14 @@ public class OpenAIServiceTests
         // Arrange
         var chat = new Mock<IChatClient>();
 
-        chat.Setup(x => x.GetCompletionAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<ChatSettings>(),
-                It.IsAny<CancellationToken>()
-            ))
+        chat.Setup(x =>
+                x.GetCompletionAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatSettings>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(
                 """
                 {
@@ -109,7 +123,8 @@ public class OpenAIServiceTests
         // Act & Assert
         // Throws exception only when the list is completely empty after filtering
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None));
+            sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None)
+        );
     }
 
     [Fact]
@@ -118,18 +133,21 @@ public class OpenAIServiceTests
         // Arrange
         var chat = new Mock<IChatClient>();
 
-        chat.Setup(x => x.GetCompletionAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<ChatSettings>(),
-                It.IsAny<CancellationToken>()
-            ))
+        chat.Setup(x =>
+                x.GetCompletionAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatSettings>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync("not-json");
 
         var sut = new OpenAIService(chat.Object);
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None));
+            sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None)
+        );
     }
 }
