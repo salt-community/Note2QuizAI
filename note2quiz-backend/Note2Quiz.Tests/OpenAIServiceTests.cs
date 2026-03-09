@@ -39,10 +39,10 @@ public class OpenAIServiceTests
         var result = await sut.GenerateQuizAsync("some text", Difficulty.Easy, CancellationToken.None);
 
         // Assert
-        Assert.Equal(5, result.Count);
-        foreach (var q in result)
+        Assert.Equal(5, result.Questions.Count);
+        foreach (var q in result.Questions)
         {
-            Assert.False(string.IsNullOrWhiteSpace(q.Text));
+            Assert.False(string.IsNullOrWhiteSpace(q.Question));
             Assert.Equal(4, q.Options.Count);
             Assert.InRange(q.CorrectOptionIndex, 0, 3);
         }
@@ -78,8 +78,8 @@ public class OpenAIServiceTests
 
         // Assert
         // remove Q instead of thowing exception
-        Assert.Single(result);
-        Assert.Equal("Valid Q", result[0].Text);
+        Assert.Single(result.Questions);
+        Assert.Equal("Valid Q", result.Questions[0].Question);
     }
 
     [Fact]
