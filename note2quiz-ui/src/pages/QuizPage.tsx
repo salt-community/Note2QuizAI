@@ -7,15 +7,13 @@ import Header from "@/components/Header";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
-import {
-	quizSession,
-	submitQuiz,
-	type SubmitQuizResponse
-} from "@/api/quizApi";
+import { quizSession, submitQuiz, type SubmitQuizResponse } from "@/api/quizApi";
+import { useToast } from "@/hooks/use-toast";
 
 const QuizPage = () => {
 	const { id } = useParams();
 	const { getToken } = useAuth();
+	const { toast } = useToast();
 
 	const [current, setCurrent] = useState(0);
 	const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -53,6 +51,18 @@ const QuizPage = () => {
 		},
 		onSuccess: result => {
 			setSubmitResult(result);
+			toast({
+				title: "Quiz submitted!",
+				description: "Your results have been saved successfully.",
+				variant: "default"
+			});
+		},
+		onError: error => {
+			toast({
+				title: "Failed to submit quiz",
+				description: error?.message ?? "Something went wrong.",
+				variant: "destructive"
+			});
 		}
 	});
 
@@ -61,6 +71,11 @@ const QuizPage = () => {
 	}
 
 	if (isError || !quiz) {
+		toast({
+			title: "Error loading quiz",
+			description: "There was a problem fetching the quiz. Please try again.",
+			variant: "destructive"
+		});
 		return <div>Error loading quiz</div>;
 	}
 
@@ -117,22 +132,16 @@ const QuizPage = () => {
 								const result = submitResult.results.find(r => r.questionId === question.id);
 								if (!result) return null;
 
-								const selectedOption = question.options.find(
-									o => o.optionId === result.selectedOptionId
-								);
+								const selectedOption = question.options.find(o => o.optionId === result.selectedOptionId);
 
-								const correctOption = question.options.find(
-									o => o.optionId === result.correctOptionId
-								);
+								const correctOption = question.options.find(o => o.optionId === result.correctOptionId);
 
 								return (
 									<div
 										key={question.id}
 										className={cn(
 											"flex items-start gap-3 rounded-xl border p-4 text-left text-sm",
-											result.isCorrect
-												? "border-success/30 bg-success/5"
-												: "border-destructive/30 bg-destructive/5"
+											result.isCorrect ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5"
 										)}
 									>
 										{result.isCorrect ? (
@@ -235,11 +244,7 @@ const QuizPage = () => {
 							Next <ArrowRight className="h-4 w-4" />
 						</Button>
 					) : (
-						<Button
-							variant="glow"
-							onClick={handleSubmit}
-							disabled={!allAnswered || submitMutation.isPending}
-						>
+						<Button variant="glow" onClick={handleSubmit} disabled={!allAnswered || submitMutation.isPending}>
 							{submitMutation.isPending ? "Submitting..." : "Submit Quiz"}
 						</Button>
 					)}
