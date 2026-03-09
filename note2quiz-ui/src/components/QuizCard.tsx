@@ -32,7 +32,7 @@ const QuizCard = ({ id, title, date, difficulty, score, questionCount, index = 0
     >
       <div className="flex flex-col gap-1.5">
         <h3 className="font-display font-semibold group-hover:text-primary transition-colors">
-          {title}
+         {title || "Untitled"}
         </h3>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
