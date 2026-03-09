@@ -51,25 +51,49 @@ public class QuizController : ControllerBase
     public async Task<ActionResult<List<QuizHistoryItemDto>>> GetQuizHistory(CancellationToken ct)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userId == null)
             return Unauthorized();
+
         var result = await _quizService.GetQuizzesAsync(userId, ct);
+
         return Ok(result);
     }
+
 
     [HttpGet("{quizSessionId}")]
     public async Task<ActionResult<QuizResponse>> GetQuiz(int quizSessionId, CancellationToken ct)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userId == null)
             return Unauthorized();
-        var result = await _quizService.GetQuizzAsync(userId, quizSessionId, ct);
+
+        var result = await _quizService.GetQuizAsync(userId, quizSessionId, ct);
+
         return Ok(result);
     }
 
-    [HttpGet("me")]
-    public async Task<IActionResult> me()
+    [HttpPost("submit")]
+    public async Task<ActionResult<SubmitQuizResponse>> Submit(
+        [FromBody] SubmitQuizRequest request,
+        CancellationToken ct)
     {
-        return Ok("authentication works");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null)
+            return Unauthorized();
+
+        if (request == null)
+            return BadRequest("Request is required.");
+
+        if (request.QuizSessionId <= 0)
+            return BadRequest("QuizSessionId is invalid.");
+
+        if (request.Answers == null || request.Answers.Count == 0)
+            return BadRequest("Answers are required.");
+
+        var result = await _quizService.SubmitQuizAsync(userId, request, ct);
+
+        return Ok(result);
     }
 }

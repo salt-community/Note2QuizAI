@@ -48,4 +48,28 @@ public class QuizRepository : IQuizRepository
             .OrderByDescending(q => q.CreatedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<QuizSession?> GetQuizSessionForSubmitAsync(int quizSessionId, CancellationToken ct)
+    {
+        return await _db.QuizSessions
+            .AsNoTracking()
+            .Include(s => s.Questions)
+            .ThenInclude(q => q.Options)
+            .FirstOrDefaultAsync(s => s.Id == quizSessionId, ct);
+    }
+
+    public async Task ReplaceUserAnswersAsync(int quizSessionId, List<UserAnswer> userAnswers, CancellationToken ct)
+    {
+        var existingAnswers = await _db.Set<UserAnswer>()
+            .Where(a => a.QuizSessionId == quizSessionId)
+            .ToListAsync();
+
+        if (existingAnswers.Count > 0)
+        {
+            _db.Set<UserAnswer>().RemoveRange(existingAnswers);
+        }
+
+        _db.Set<UserAnswer>().AddRange(userAnswers);
+        await _db.SaveChangesAsync(ct);
+    }
 }

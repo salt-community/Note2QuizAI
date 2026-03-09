@@ -70,29 +70,32 @@ public class QuizService : IQuizService
                 .Questions.Select(q => new QuestionDto(
                     Id: q.Id,
                     Text: q.Text,
-                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect))
+                    Options: q.Options.Select(o => new OptionDto(o.Id, o.Text))
                         .ToList()
                 ))
                 .ToList()
         );
     }
 
-    public async Task<QuizResponse> GetQuizzAsync(
+    public async Task<QuizResponse> GetQuizAsync(
         string userId,
         int quizSessionId,
         CancellationToken ct
     )
     {
         var session = await _repo.GetQuizSessionById(userId, quizSessionId, ct);
+
         if (session == null)
             throw new Exception("Quiz not found");
+
         var questions = session
             .Questions.Select(q => new QuestionDto(
                 q.Id,
                 q.Text,
-                q.Options.Select(o => new OptionDto(o.Id, o.Text, o.IsCorrect)).ToList()
+                q.Options.Select(o => new OptionDto(o.Id, o.Text)).ToList()
             ))
             .ToList();
+
         return new QuizResponse(session.Id, questions);
     }
 
@@ -109,5 +112,86 @@ public class QuizService : IQuizService
                 Title: s.Title
             ))
             .ToList();
+    }
+
+    public async Task<SubmitQuizResponse> SubmitQuizAsync(
+    string userId,
+    SubmitQuizRequest request,
+    CancellationToken ct)
+    {
+        QuizSubmissionValidator.ValidateSubmitRequest(request);
+
+        var session = await _repo.GetQuizSessionForSubmitAsync(request.QuizSessionId, ct);
+
+        QuizSubmissionValidator.ValidateSession(session, userId);
+        QuizSubmissionValidator.ValidateAnswers(request, session!);
+
+        var evaluation = EvaluateAnswers(session!, request.Answers);
+
+        await _repo.ReplaceUserAnswersAsync(session!.Id, evaluation.UserAnswers, ct);
+
+        return new SubmitQuizResponse(
+            QuizSessionId: session.Id,
+            Score: evaluation.Score,
+            TotalQuestions: session.Questions.Count,
+            Results: evaluation.Results.OrderBy(r => r.QuestionId).ToList()
+        );
+    }
+
+    private static SubmitEvaluation EvaluateAnswers(
+        QuizSession session,
+        List<AnswerDto> answers)
+    {
+        var userAnswers = new List<UserAnswer>();
+        var results = new List<QuestionResultDto>();
+        var score = 0;
+
+        foreach (var answer in answers)
+        {
+            var question = session.Questions.First(q => q.Id == answer.QuestionId);
+
+            var selected = question.Options.FirstOrDefault(o => o.Id == answer.SelectedOptionId);
+            if (selected == null)
+                throw new InvalidOperationException("Selected option does not belong to the question.");
+
+            var correct = question.Options.FirstOrDefault(o => o.IsCorrect);
+            if (correct == null)
+                throw new InvalidOperationException("Question has no correct option configured.");
+
+            var isCorrect = selected.Id == correct.Id;
+
+            if (isCorrect)
+            {
+                score++;
+            }
+
+            userAnswers.Add(new UserAnswer
+            {
+                QuizSessionId = session.Id,
+                QuestionId = question.Id,
+                OptionId = selected.Id
+            });
+
+            results.Add(new QuestionResultDto(
+                QuestionId: question.Id,
+                SelectedOptionId: selected.Id,
+                CorrectOptionId: correct.Id,
+                IsCorrect: isCorrect
+            ));
+        }
+
+        return new SubmitEvaluation
+        {
+            Score = score,
+            UserAnswers = userAnswers,
+            Results = results
+        };
+    }
+
+    private sealed class SubmitEvaluation
+    {
+        public int Score { get; set; }
+        public List<UserAnswer> UserAnswers { get; set; } = new();
+        public List<QuestionResultDto> Results { get; set; } = new();
     }
 }

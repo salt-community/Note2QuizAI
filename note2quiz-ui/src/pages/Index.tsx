@@ -21,14 +21,22 @@ const Index = () => {
       return quizHistory(token);
     }
   })
-console.log("-------index page quizzes----",quizzes);
-const hasQuizzes = quizzes && quizzes.length > 0
-const scoredQuizzes = quizzes?.filter(q => q.score !== null) || [];
-const avgScore = scoredQuizzes.length > 0
-  ? Math.round(scoredQuizzes.reduce((sum, q) => sum + q.score!, 0) / scoredQuizzes.length)
-  : 0;
 
-console.log("-------avgScore----",avgScore);
+const hasQuizzes = quizzes && quizzes.length > 0
+const scoredQuizzes = quizzes?.filter(q => q.score != null) || [];
+
+const avgScore =
+  scoredQuizzes.length > 0
+    ? Math.round(
+        scoredQuizzes.reduce((sum, q) => {
+          const percent = q.questionCount > 0
+            ? ((q.score ?? 0) / q.questionCount) * 100
+            : 0;
+
+          return sum + percent;
+        }, 0) / scoredQuizzes.length
+      )
+    : 0;
 
   return (
     <div className="min-h-screen">
@@ -62,6 +70,7 @@ console.log("-------avgScore----",avgScore);
             <div className="mb-4">
               <h2 className="font-display text-lg font-semibold">Quiz History</h2>
             </div>
+            
             <div className="flex flex-col gap-3">
               {quizzes?.map((quiz, i) => (
                  <QuizCard
@@ -70,7 +79,11 @@ console.log("-------avgScore----",avgScore);
                     title={`Quiz ${quiz.quizSessionId}`}
                     date={new Date(quiz.createdAt).toLocaleDateString()}
                     difficulty={quiz.difficulty}
-                    score={quiz.score}
+                    score={
+                      quiz.score != null && quiz.questionCount > 0
+                        ? Math.round((quiz.score / quiz.questionCount) * 100)
+                        : 0
+                    }
                     questionCount={quiz.questionCount}
                     index={i}
                   />

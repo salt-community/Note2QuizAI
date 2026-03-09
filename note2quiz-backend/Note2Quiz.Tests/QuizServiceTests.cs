@@ -5,6 +5,7 @@ using Note2Quiz.API.Interfaces;
 using Note2Quiz.API.Models;
 using Note2Quiz.API.Services.OpenAI;
 using Note2Quiz.API.Services.OpenAI.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Note2Quiz.API.Services;
 

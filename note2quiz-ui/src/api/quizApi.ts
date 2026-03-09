@@ -5,25 +5,45 @@ export enum Difficulty {
 	Medium = "Medium",
 	Hard = "Hard"
 }
-export const uploadImageAndGenerateQuiz = async(
-    file:File,
-    difficulty: Difficulty,
-    token:string
-) =>
-{
-    const formData = new FormData();
-	formData.append("file", file);
-	formData.append("difficulty", difficulty);
-    const newToken = token.trim();
-	const response = await fetch(API_ENDPOINTS.quiz.generate, {
-		method: "POST",
-		headers: {
-			Authorization: `Bearer ${newToken}`
-		},
-		body: formData
-	});
-	if (!response.ok) throw new Error("Failed to generate quiz");
-	return response.json();
+
+export interface OptionDto {
+	optionId: number;
+	optionText: string;
+}
+
+export interface QuestionDto {
+	id: number;
+	text: string;
+	options: OptionDto[];
+}
+
+export interface QuizResponse {
+	quizSessionId: number;
+	questions: QuestionDto[];
+}
+
+export interface AnswerDto {
+	questionId: number;
+	selectedOptionId: number;
+}
+
+export interface SubmitQuizRequest {
+	quizSessionId: number;
+	answers: AnswerDto[];
+}
+
+export interface QuestionResultDto {
+	questionId: number;
+	selectedOptionId: number;
+	correctOptionId: number;
+	isCorrect: boolean;
+}
+
+export interface SubmitQuizResponse {
+	quizSessionId: number;
+	score: number;
+	totalQuestions: number;
+	results: QuestionResultDto[];
 }
 
 export interface QuizHistory {
@@ -31,29 +51,82 @@ export interface QuizHistory {
 	createdAt: string;
 	questionCount: number;
 	score?: number;
-	difficulty: Difficulty;
+	difficulty?: Difficulty;
 }
 
+export const uploadImageAndGenerateQuiz = async (
+	file: File,
+	difficulty: Difficulty,
+	token: string
+): Promise<QuizResponse> => {
+	const formData = new FormData();
+	formData.append("file", file);
+	formData.append("difficulty", difficulty);
+
+	const response = await fetch(API_ENDPOINTS.quiz.generate, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${token.trim()}`
+		},
+		body: formData
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to generate quiz");
+	}
+
+	return response.json();
+};
+
 export const quizHistory = async (token: string): Promise<QuizHistory[]> => {
-    const newToken = token.trim();
-    console.log("toke.....",newToken);
 	const response = await fetch(API_ENDPOINTS.quiz.history, {
 		method: "GET",
 		headers: {
-			Authorization: `Bearer ${newToken}`
+			Authorization: `Bearer ${token.trim()}`
 		}
 	});
-	if (!response.ok) throw new Error("Failed to get quiz history");
+
+	if (!response.ok) {
+		throw new Error("Failed to get quiz history");
+	}
+
 	return response.json();
 };
-export const quizSession = async (id:number,token:string) =>{
-    const newToken = token.trim();
-    const response = await fetch(API_ENDPOINTS.quiz.quizSession(id),{
-        method:"GET",
-        headers:{
-            Authorization: `Bearer ${newToken}`
-        }
-    });
-    if(!response.ok) throw new Error("Failed to get quiz Session");
-    return response.json();
-}
+
+export const quizSession = async (
+	id: number,
+	token: string
+): Promise<QuizResponse> => {
+	const response = await fetch(API_ENDPOINTS.quiz.quizSession(id), {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${token.trim()}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to get quiz session");
+	}
+
+	return response.json();
+};
+
+export const submitQuiz = async (
+	payload: SubmitQuizRequest,
+	token: string
+): Promise<SubmitQuizResponse> => {
+	const response = await fetch(API_ENDPOINTS.quiz.submit, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${token.trim()}`
+		},
+		body: JSON.stringify(payload)
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to submit quiz");
+	}
+
+	return response.json();
+};
