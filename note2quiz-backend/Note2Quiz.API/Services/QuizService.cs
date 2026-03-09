@@ -119,12 +119,12 @@ public class QuizService : IQuizService
     SubmitQuizRequest request,
     CancellationToken ct)
     {
-        ValidateSubmitRequest(request);
+        QuizSubmissionValidator.ValidateSubmitRequest(request);
 
         var session = await _repo.GetQuizSessionForSubmitAsync(request.QuizSessionId, ct);
 
-        ValidateSession(session, userId);
-        ValidateAnswers(request, session!);
+        QuizSubmissionValidator.ValidateSession(session, userId);
+        QuizSubmissionValidator.ValidateAnswers(request, session!);
 
         var evaluation = EvaluateAnswers(session!, request.Answers);
 
@@ -136,53 +136,6 @@ public class QuizService : IQuizService
             TotalQuestions: session.Questions.Count,
             Results: evaluation.Results.OrderBy(r => r.QuestionId).ToList()
         );
-    }
-
-    private static void ValidateSubmitRequest(SubmitQuizRequest request)
-    {
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
-
-        if (request.QuizSessionId <= 0)
-            throw new ArgumentException("QuizSessionId is invalid.", nameof(request.QuizSessionId));
-
-        if (request.Answers == null || request.Answers.Count == 0)
-            throw new ArgumentException("Answers are required.", nameof(request.Answers));
-    }
-
-    private static void ValidateSession(QuizSession? session, string userId)
-    {
-        if (session == null)
-            throw new InvalidOperationException("Quiz session not found.");
-
-        if (session.UserId != userId)
-            throw new UnauthorizedAccessException("This quiz session does not belong to the current user.");
-    }
-
-    private static void ValidateAnswers(SubmitQuizRequest request, QuizSession session)
-    {
-        if (request.Answers.Count != session.Questions.Count)
-            throw new InvalidOperationException("Answers must include exactly one answer per question.");
-
-        var duplicateQuestionIds = request.Answers
-            .GroupBy(a => a.QuestionId)
-            .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
-            .ToList();
-
-        if (duplicateQuestionIds.Count > 0)
-            throw new InvalidOperationException("Duplicate answers for the same question are not allowed.");
-
-        var questionIds = session.Questions
-            .Select(q => q.Id)
-            .ToHashSet();
-
-        var answerQuestionIds = request.Answers
-            .Select(a => a.QuestionId)
-            .ToHashSet();
-
-        if (!questionIds.SetEquals(answerQuestionIds))
-            throw new InvalidOperationException("Answers must include exactly one answer per question.");
     }
 
     private static SubmitEvaluation EvaluateAnswers(
