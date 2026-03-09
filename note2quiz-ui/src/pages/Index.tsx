@@ -76,7 +76,7 @@ const avgScore =
                  <QuizCard
                     key={quiz.quizSessionId}
                     id={quiz.quizSessionId.toString()}
-                    title={`Quiz ${quiz.quizSessionId}`}
+                    title={quiz.title}
                     date={new Date(quiz.createdAt).toLocaleDateString()}
                     difficulty={quiz.difficulty}
                     score={

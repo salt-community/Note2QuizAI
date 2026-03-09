@@ -52,6 +52,7 @@ export interface QuizHistory {
 	questionCount: number;
 	score?: number;
 	difficulty?: Difficulty;
+    title?:string;
 }
 
 export const uploadImageAndGenerateQuiz = async (
