@@ -45,24 +45,23 @@ public class QuizService : IQuizService
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             Difficulty = request.Difficulty,
-            Questions = aiQuestions
-                .Select(ai => new Question
-                {
-                    Text = ai.Text.Trim(),
-                    CreatedAt = DateTime.UtcNow,
-                    Options = ai
-                        .Options.Select(
-                            (optText, index) =>
-                                new Option
-                                {
-                                    Text = optText.Trim(),
-                                    IsCorrect = index == ai.CorrectOptionIndex,
-                                }
-                        )
-                        .ToList(),
-                })
-                .ToList(),
+            Title = aiQuestions.Title,
+            Questions = aiQuestions.Questions
+          .Select(q => new Question
+          {
+              Text = q.Question.Trim(),
+              CreatedAt = DateTime.UtcNow,
+              Options = q.Options
+                  .Select((opt, index) => new Option
+                  {
+                      Text = opt.Trim(),
+                      IsCorrect = index == q.CorrectOptionIndex
+                  })
+                  .ToList()
+          })
+          .ToList()
         };
+
         var saved = await _repo.CreateQuizSessionAsync(session, ct);
 
         return new QuizResponse(
@@ -106,7 +105,8 @@ public class QuizService : IQuizService
                 CreatedAt: s.CreatedAt,
                 QuestionCount: s.Questions.Count,
                 Score: s.UserAnswers.Any() ? s.UserAnswers.Count(ua => ua.Option.IsCorrect) : null,
-                Difficulty: s.Difficulty
+                Difficulty: s.Difficulty,
+                Title: s.Title
             ))
             .ToList();
     }

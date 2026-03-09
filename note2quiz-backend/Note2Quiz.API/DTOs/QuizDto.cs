@@ -38,5 +38,6 @@ public record QuizHistoryItemDto(
     DateTime CreatedAt,
     int QuestionCount,
     int? Score,
-    Difficulty Difficulty
+    Difficulty Difficulty,
+    string Title
 );
