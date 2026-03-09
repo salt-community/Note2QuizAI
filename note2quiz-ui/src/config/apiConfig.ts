@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
 	quiz: {
 		generate: `${BASE_URL}/api/quiz`,
 		history: `${BASE_URL}/api/quiz/history`,
-        quizSession:(id:number)=>`${BASE_URL}/api/quiz/${id}`
+        quizSession:(id:number)=>`${BASE_URL}/api/quiz/${id}`,
+		submit: `${BASE_URL}/api/quiz/submit`
 	}
 };

@@ -23,7 +23,7 @@ const Header = () => {
           <Link
             to="/"
             className={cn(
-              "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
+              "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors hidden sm:block",
               location.pathname === "/"
                 ? "bg-secondary text-foreground"
                 : "text-muted-foreground hover:text-foreground"
