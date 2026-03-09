@@ -1,5 +1,4 @@
 using Note2Quiz.API.DTOs;
-using Note2Quiz.API.Models;
 using Note2Quiz.API.Services.OpenAI.Models;
 
 namespace Note2Quiz.API.Services.OpenAI;
@@ -15,7 +14,7 @@ public class OpenAIService : IOpenAIService
         _chatClient = chatClient;
     }
 
-    public async Task<List<GeneratedQuestion>> GenerateQuizAsync(
+    public async Task<QuizGenResponse> GenerateQuizAsync(
     string sourceText,
     Difficulty difficulty,
     CancellationToken ct
@@ -42,10 +41,6 @@ public class OpenAIService : IOpenAIService
 
         OpenAIValidator.Validate(model);
 
-        return model.Questions.Select(q => new GeneratedQuestion(
-            Text: q.Question,
-            Options: q.Options,
-            CorrectOptionIndex: q.CorrectOptionIndex
-        )).ToList();
+        return model;
     }
 }
