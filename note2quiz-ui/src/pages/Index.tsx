@@ -6,16 +6,37 @@ import Header from "@/components/Header";
 import StatsCard from "@/components/StatsCard";
 import QuizCard from "@/components/QuizCard";
 import EmptyState from "@/components/EmptyState";
+import { useAuth } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
+import { quizHistory } from "@/api/quizApi";
 
-const sampleQuizzes = [
-  { id: "1", title: "Biology Chapter 5: Cell Division", date: "Feb 25, 2026", difficulty: "Medium" as const, score: 85, questionCount: 10 },
-  { id: "2", title: "History: World War II Key Events", date: "Feb 24, 2026", difficulty: "Hard" as const, score: 72, questionCount: 15 },
-  { id: "3", title: "Math: Linear Algebra Basics", date: "Feb 23, 2026", difficulty: "Easy" as const, score: 95, questionCount: 8 },
-  { id: "4", title: "Chemistry: Organic Reactions", date: "Feb 22, 2026", difficulty: "Hard" as const, questionCount: 12 },
-];
 
 const Index = () => {
-  const hasQuizzes = sampleQuizzes.length > 0;
+  const {getToken} = useAuth();
+  const {data:quizzes,isLoading,isError} = useQuery({
+    queryKey: ["quizHistory"],
+    queryFn:async() =>{
+      const token = await getToken();
+      if(!token) throw new Error("Token not available");
+      return quizHistory(token);
+    }
+  })
+
+const hasQuizzes = quizzes && quizzes.length > 0
+const scoredQuizzes = quizzes?.filter(q => q.score != null) || [];
+
+const avgScore =
+  scoredQuizzes.length > 0
+    ? Math.round(
+        scoredQuizzes.reduce((sum, q) => {
+          const percent = q.questionCount > 0
+            ? ((q.score ?? 0) / q.questionCount) * 100
+            : 0;
+
+          return sum + percent;
+        }, 0) / scoredQuizzes.length
+      )
+    : 0;
 
   return (
     <div className="min-h-screen">
@@ -42,17 +63,30 @@ const Index = () => {
         {hasQuizzes && (
           <>
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatsCard icon={BookOpen} label="Quizzes Created" value={12} delay={0} />
-              <StatsCard icon={Flame} label="Day Streak" value={5} delay={0.1} />
-              <StatsCard icon={Trophy} label="Avg. Score" value="84%" delay={0.2} />
+              <StatsCard icon={BookOpen} label="Quizzes Created" value={quizzes.length} delay={0} />
+              <StatsCard icon={Trophy} label="Avg. Score" value={`${avgScore}%`} delay={0.2} />
             </div>
 
             <div className="mb-4">
               <h2 className="font-display text-lg font-semibold">Quiz History</h2>
             </div>
+            
             <div className="flex flex-col gap-3">
-              {sampleQuizzes.map((quiz, i) => (
-                <QuizCard key={quiz.id} {...quiz} index={i} />
+              {quizzes?.map((quiz, i) => (
+                 <QuizCard
+                    key={quiz.quizSessionId}
+                    id={quiz.quizSessionId.toString()}
+                    title={quiz.title}
+                    date={new Date(quiz.createdAt).toLocaleDateString()}
+                    difficulty={quiz.difficulty}
+                    score={
+                      quiz.score != null && quiz.questionCount > 0
+                        ? Math.round((quiz.score / quiz.questionCount) * 100)
+                        : 0
+                    }
+                    questionCount={quiz.questionCount}
+                    index={i}
+                  />
               ))}
             </div>
           </>

@@ -15,7 +15,7 @@ const Header = () => {
             <Zap className="absolute -right-1 -top-1 h-3.5 w-3.5 text-warning" />
           </div>
           <span className="font-display text-xl font-bold tracking-tight ">
-            Note<span className="gradient-text">2Quiz</span>
+            Note<span className="gradient-text">2QuizAI</span>
           </span>
         </Link>
 
@@ -23,7 +23,7 @@ const Header = () => {
           <Link
             to="/"
             className={cn(
-              "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
+              "rounded-lg px-3.5 py-2 text-sm font-medium transition-colors hidden sm:block",
               location.pathname === "/"
                 ? "bg-secondary text-foreground"
                 : "text-muted-foreground hover:text-foreground"
