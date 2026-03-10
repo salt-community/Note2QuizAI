@@ -231,7 +231,7 @@ public class QuizServiceTests
         var sut = new QuizService(repo.Object, openAi.Object, vision.Object);
 
         // act
-        var result = await sut.GetQuizzAsync("user-1", 1, CancellationToken.None);
+        var result = await sut.GetQuizAsync("user-1", 1, CancellationToken.None);
 
         // assert
         Assert.NotNull(result);
