@@ -67,7 +67,24 @@ const QuizPage = () => {
 	});
 
 	if (isLoading) {
-		return <Loader2 className="h-4 w-4 animate-spin" />;
+		return (
+			<div className="min-h-screen">
+				<div className="container max-w-2xl py-12">
+					<motion.div
+						key="loading"
+						initial={{ opacity: 0, scale: 0.95 }}
+						animate={{ opacity: 1, scale: 1 }}
+						exit={{ opacity: 0 }}
+						className="flex flex-col items-center justify-center py-20"
+					>
+						<div className="relative mb-6">
+							<div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent animate-pulse-glow" />
+							<Loader2 className="absolute inset-0 m-auto h-8 w-8 text-primary-foreground animate-spin" />
+						</div>
+					</motion.div>
+				</div>
+			</div>
+		);
 	}
 
 	if (isError || !quiz) {
